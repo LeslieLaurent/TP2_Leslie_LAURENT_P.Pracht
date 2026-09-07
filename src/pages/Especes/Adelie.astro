@@ -1,0 +1,101 @@
+---
+import * as Plot from "@observablehq/plot";
+
+import Layout from "../../layouts/Layout.astro";
+import PlotFigure from "../../components/PlotFigure.astro";
+
+import penguins from "../../data/penguins.json";
+---
+
+<Layout title="Adelie — TP2 Observable Plot">
+
+  <main class="mx-auto max-w-6xl px-6 py-16 lg:px-10">
+
+    <a
+      href="/"
+      class="text-sm font-medium text-slate-500 transition
+             hover:text-emerald-700"
+    >
+      ← Retour à l'accueil
+    </a>
+
+
+    <section class="py-20">
+
+      <p
+        class="mb-4 text-sm font-bold uppercase tracking-[0.2em]
+               text-emerald-700"
+      >
+        TP2 · Espèce 01
+      </p>
+
+      <h1
+        class="text-6xl font-bold tracking-tight text-slate-900
+               md:text-8xl"
+      >
+        Adelie
+      </h1>
+
+      <p
+        class="mt-6 max-w-2xl text-lg leading-8 text-slate-600"
+      >
+        Visualisation des manchots de l'espèce Adelie à partir
+        du dataset Penguins.
+      </p>
+
+    </section>
+
+
+    <section class="pb-20">
+
+      <div
+        class="rounded-3xl border border-slate-200
+               bg-white p-5 shadow-sm md:p-10"
+      >
+
+        <PlotFigure
+          options={{
+            width: 900,
+
+            title:
+              "Morphologie des manchots Adelie",
+
+            subtitle:
+              "Longueur et profondeur du bec",
+
+            caption:
+              "Seuls les manchots de l'espèce Adelie sont affichés.",
+
+            ariaLabel:
+              "Nuage de points représentant uniquement les manchots Adelie.",
+
+            x: {
+              label: "Longueur du bec (mm)",
+              grid: true
+            },
+
+            y: {
+              label: "Profondeur du bec (mm)",
+              grid: true
+            },
+
+            marks: [
+              Plot.dot(penguins, {
+                filter: (d) => d.species === "Adelie",
+                x: "culmen_length_mm",
+                y: "culmen_depth_mm",
+                fill: "species",
+                r: 5,
+                opacity: 0.8
+              })
+            ]
+          }}
+        />
+
+      </div>
+
+    </section>
+
+  </main>
+
+</Layout>
