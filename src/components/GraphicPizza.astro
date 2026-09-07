@@ -1,0 +1,1210 @@
+---
+import * as Plot from "@observablehq/plot";
+import { csvParse } from "d3-dsv";
+
+import PlotFigure from "./PlotFigure.astro";
+import pizzaCSV from "../data/pizza.csv?raw";
+
+interface Props {
+  category?:
+    | "Classic"
+    | "Specialty"
+    | "Vegetarian";
+}
+
+const { category = "Classic" } =
+  Astro.props as Partial<Props>;
+
+
+const categoryStyles = {
+
+  Classic: {
+    accent: "#e2875d",
+    soft: "#3c251e"
+  },
+
+  Specialty: {
+    accent: "#d985a7",
+    soft: "#3b2130"
+  },
+
+  Vegetarian: {
+    accent: "#7dbb86",
+    soft: "#203627"
+  }
+
+} as const;
+
+
+const categoryStyle =
+  categoryStyles[category];
+
+
+const slug =
+  category.toLowerCase();
+
+
+const pizzaRaw =
+  csvParse(pizzaCSV);
+
+
+const pizza =
+  pizzaRaw.map((row) => ({
+
+    date:
+      row.order_date,
+
+    day:
+      row.day_of_week,
+
+    category:
+      row.category,
+
+    name:
+      row.name,
+
+    price:
+      row.price
+        ? Number(row.price)
+        : null,
+
+    orders:
+      row.orders
+        ? Number(row.orders)
+        : null,
+
+    revenue:
+      row.revenue
+        ? Number(row.revenue)
+        : null
+
+  }));
+
+
+const days = [
+  {
+    original: "Monday",
+    label: "Lundi"
+  },
+  {
+    original: "Tuesday",
+    label: "Mardi"
+  },
+  {
+    original: "Wednesday",
+    label: "Mercredi"
+  },
+  {
+    original: "Thursday",
+    label: "Jeudi"
+  },
+  {
+    original: "Friday",
+    label: "Vendredi"
+  },
+  {
+    original: "Saturday",
+    label: "Samedi"
+  },
+  {
+    original: "Sunday",
+    label: "Dimanche"
+  }
+];
+
+
+/* ------------------------------------------------ */
+/* STATS                                            */
+/* ------------------------------------------------ */
+
+const stats =
+  pizza.reduce(
+
+    (acc, row) => {
+
+      if (
+        row.category !==
+        category
+      ) {
+        return acc;
+      }
+
+
+      acc.observations += 1;
+
+
+      if (
+        row.orders !== null
+      ) {
+        acc.orders +=
+          row.orders;
+      }
+
+
+      if (
+        row.revenue !== null
+      ) {
+        acc.revenue +=
+          row.revenue;
+      }
+
+
+      if (
+        row.price !== null
+      ) {
+
+        acc.totalPrice +=
+          row.price;
+
+        acc.priceCount += 1;
+
+      }
+
+
+      acc.names.add(
+        row.name
+      );
+
+
+      return acc;
+
+    },
+
+    {
+      observations: 0,
+      orders: 0,
+      revenue: 0,
+
+      totalPrice: 0,
+      priceCount: 0,
+
+      names:
+        new Set<string>()
+    }
+
+  );
+
+
+const averagePrice =
+  stats.priceCount > 0
+    ? stats.totalPrice /
+      stats.priceCount
+    : 0;
+
+
+const formatNumber =
+  (value: number) =>
+    new Intl.NumberFormat(
+      "fr-FR",
+      {
+        maximumFractionDigits: 0
+      }
+    ).format(value);
+
+
+const formatMoney =
+  (value: number) =>
+    new Intl.NumberFormat(
+      "fr-FR",
+      {
+        style: "currency",
+        currency: "EUR",
+        maximumFractionDigits: 0
+      }
+    ).format(value);
+
+
+/* ------------------------------------------------ */
+/* COMMANDES PAR JOUR                               */
+/* ------------------------------------------------ */
+
+const dayMap =
+  new Map<string, number>();
+
+
+days.forEach(
+  (day) =>
+    dayMap.set(
+      day.original,
+      0
+    )
+);
+
+
+pizza.forEach(
+  (row) => {
+
+    if (
+      row.category !==
+        category ||
+      row.orders === null
+    ) {
+      return;
+    }
+
+
+    dayMap.set(
+      row.day,
+
+      (
+        dayMap.get(row.day) ??
+        0
+      ) +
+      row.orders
+    );
+
+  }
+);
+
+
+const dayData =
+  days.map((day) => ({
+
+    day:
+      day.label,
+
+    orders:
+      dayMap.get(
+        day.original
+      ) ?? 0
+
+  }));
+
+
+/* ------------------------------------------------ */
+/* TOP PIZZAS                                       */
+/* ------------------------------------------------ */
+
+const pizzaMap =
+  new Map<
+    string,
+    {
+      name: string;
+      orders: number;
+      revenue: number;
+    }
+  >();
+
+
+pizza.forEach(
+  (row) => {
+
+    if (
+      row.category !==
+      category
+    ) {
+      return;
+    }
+
+
+    const current =
+      pizzaMap.get(
+        row.name
+      ) ?? {
+
+        name:
+          row.name,
+
+        orders: 0,
+        revenue: 0
+
+      };
+
+
+    current.orders +=
+      row.orders ?? 0;
+
+
+    current.revenue +=
+      row.revenue ?? 0;
+
+
+    pizzaMap.set(
+      row.name,
+      current
+    );
+
+  }
+);
+
+
+const topPizzas =
+  Array.from(
+    pizzaMap.values()
+  )
+    .sort(
+      (a, b) =>
+        b.orders -
+        a.orders
+    )
+    .slice(0, 8);
+
+
+/* ------------------------------------------------ */
+/* REVENU MENSUEL                                   */
+/* ------------------------------------------------ */
+
+const monthMap =
+  new Map<
+    string,
+    {
+      date: Date;
+      revenue: number;
+    }
+  >();
+
+
+pizza.forEach(
+  (row) => {
+
+    if (
+      row.category !== category ||
+      row.revenue === null ||
+      !row.date
+    ) {
+      return;
+    }
+
+
+    const date =
+      new Date(row.date);
+
+
+    const year =
+      date.getUTCFullYear();
+
+
+    const month =
+      date.getUTCMonth();
+
+
+    const key =
+      `${year}-${String(
+        month + 1
+      ).padStart(2, "0")}`;
+
+
+    const current =
+      monthMap.get(key) ?? {
+
+        date:
+          new Date(
+            Date.UTC(
+              year,
+              month,
+              1
+            )
+          ),
+
+        revenue: 0
+
+      };
+
+
+    current.revenue +=
+      row.revenue;
+
+
+    monthMap.set(
+      key,
+      current
+    );
+
+  }
+);
+
+
+const monthlyRevenue =
+  Array.from(
+    monthMap.values()
+  ).sort(
+    (a, b) =>
+      a.date.getTime() -
+      b.date.getTime()
+  );
+
+
+const monthFormatter =
+  new Intl.DateTimeFormat(
+    "fr-FR",
+    {
+      month: "short",
+      year: "2-digit",
+      timeZone: "UTC"
+    }
+  );
+
+
+const plotStyle = {
+  backgroundColor: "#291b18",
+  color: "#fff7f2",
+  padding: "16px",
+  fontSize: "13px"
+};
+---
+
+<section
+  class="graphic-pizza
+         rounded-3xl
+         border border-[#5b372d]
+         bg-[#211613]
+         p-5 md:p-10"
+  data-category={category}
+  aria-labelledby={`pizza-title-${slug}`}
+  style={`
+    --pizza-accent: ${categoryStyle.accent};
+    --pizza-soft: ${categoryStyle.soft};
+  `}
+>
+
+  <header class="mb-10">
+
+    <div
+      class="mb-4
+             flex items-center gap-3"
+    >
+
+      <span
+        class="h-3 w-3
+               rounded-full"
+        style={`background-color: ${categoryStyle.accent};`}
+        aria-hidden="true"
+      >
+      </span>
+
+      <p
+        class="text-sm font-bold
+               uppercase
+               tracking-[0.18em]
+               text-[#e8ad91]"
+      >
+        Catégorie Pizza
+      </p>
+
+    </div>
+
+
+    <h3
+      id={`pizza-title-${slug}`}
+      class="text-4xl font-bold
+             tracking-tight
+             text-[#fff7f2]
+             md:text-5xl"
+    >
+      {category}
+    </h3>
+
+
+    <p
+      class="mt-4 max-w-3xl
+             leading-7
+             text-[#d5bcb2]"
+    >
+      Explorer les ventes et habitudes de commande
+      de la catégorie {category}.
+    </p>
+
+  </header>
+
+
+  <dl
+    class="mb-12
+           grid gap-4
+           sm:grid-cols-2
+           xl:grid-cols-4"
+  >
+
+    <div
+      class="stat-card
+             rounded-2xl
+             border border-[#5b372d]
+             bg-[#291b18]
+             p-5"
+    >
+      <dt class="text-sm text-[#d5bcb2]">
+        Commandes
+      </dt>
+
+      <dd
+        class="mt-2 text-3xl
+               font-bold text-white"
+      >
+        {formatNumber(stats.orders)}
+      </dd>
+    </div>
+
+
+    <div
+      class="stat-card
+             rounded-2xl
+             border border-[#5b372d]
+             bg-[#291b18]
+             p-5"
+    >
+      <dt class="text-sm text-[#d5bcb2]">
+        Chiffre d'affaires
+      </dt>
+
+      <dd
+        class="mt-2 text-3xl
+               font-bold text-white"
+      >
+        {formatMoney(stats.revenue)}
+      </dd>
+    </div>
+
+
+    <div
+      class="stat-card
+             rounded-2xl
+             border border-[#5b372d]
+             bg-[#291b18]
+             p-5"
+    >
+      <dt class="text-sm text-[#d5bcb2]">
+        Pizzas différentes
+      </dt>
+
+      <dd
+        class="mt-2 text-3xl
+               font-bold text-white"
+      >
+        {stats.names.size}
+      </dd>
+    </div>
+
+
+    <div
+      class="stat-card
+             rounded-2xl
+             border border-[#5b372d]
+             bg-[#291b18]
+             p-5"
+    >
+      <dt class="text-sm text-[#d5bcb2]">
+        Prix moyen
+      </dt>
+
+      <dd
+        class="mt-2 text-3xl
+               font-bold text-white"
+      >
+        {averagePrice.toLocaleString(
+          "fr-FR",
+          {
+            maximumFractionDigits: 1
+          }
+        )}
+
+        <span
+          class="text-base
+                 font-normal
+                 text-[#d5bcb2]"
+        >
+          €
+        </span>
+      </dd>
+    </div>
+
+  </dl>
+
+
+  <!-- TABS -->
+
+  <div class="mb-8">
+
+    <p
+      class="mb-4
+             text-sm font-bold
+             uppercase
+             tracking-[0.16em]
+             text-[#e8ad91]"
+    >
+      Explorer les données
+    </p>
+
+
+    <div
+      class="flex flex-wrap gap-3"
+      role="tablist"
+    >
+
+      <button
+        id={`pizza-tab-${slug}-week`}
+        type="button"
+        role="tab"
+        aria-selected="true"
+        aria-controls={`pizza-panel-${slug}-week`}
+        data-view="week"
+        data-description="Comparer le volume de commandes selon le jour de la semaine."
+        class="view-tab
+               min-h-11
+               rounded-full
+               border
+               px-5 py-3
+               text-sm font-bold"
+      >
+        Commandes par jour
+      </button>
+
+
+      <button
+        id={`pizza-tab-${slug}-top`}
+        type="button"
+        role="tab"
+        aria-selected="false"
+        aria-controls={`pizza-panel-${slug}-top`}
+        tabindex="-1"
+        data-view="top"
+        data-description="Identifier les références de pizzas les plus commandées dans cette catégorie."
+        class="view-tab
+               min-h-11
+               rounded-full
+               border
+               px-5 py-3
+               text-sm font-bold"
+      >
+        Pizzas populaires
+      </button>
+
+
+      <button
+        id={`pizza-tab-${slug}-time`}
+        type="button"
+        role="tab"
+        aria-selected="false"
+        aria-controls={`pizza-panel-${slug}-time`}
+        tabindex="-1"
+        data-view="time"
+        data-description="Observer l'évolution du chiffre d'affaires mensuel de la catégorie."
+        class="view-tab
+               min-h-11
+               rounded-full
+               border
+               px-5 py-3
+               text-sm font-bold"
+      >
+        Évolution des revenus
+      </button>
+
+    </div>
+
+
+    <p
+      class="view-description
+             mt-5 max-w-3xl
+             border-l-4
+             pl-4
+             leading-7
+             text-[#ead8d0]"
+      style={`border-color: ${categoryStyle.accent};`}
+      aria-live="polite"
+    >
+      Comparer le volume de commandes selon
+      le jour de la semaine.
+    </p>
+
+  </div>
+
+
+  <!-- COMMANDES JOUR -->
+
+  <div
+    id={`pizza-panel-${slug}-week`}
+    class="graphic-panel"
+    data-panel="week"
+    role="tabpanel"
+    tabindex="0"
+  >
+
+    <PlotFigure
+      options={{
+        width: 900,
+        height: 500,
+
+        marginLeft: 80,
+        marginBottom: 70,
+
+        style: plotStyle,
+
+        title:
+          `Commandes par jour — ${category}`,
+
+        ariaLabel:
+          `Commandes hebdomadaires de la catégorie ${category}.`,
+
+        x: {
+          label: "Jour",
+          domain:
+            days.map(
+              (day) =>
+                day.label
+            )
+        },
+
+        y: {
+          label: "Commandes",
+          grid: true
+        },
+
+        marks: [
+
+          Plot.barY(
+            dayData,
+            {
+              x: "day",
+              y: "orders",
+
+              fill:
+                categoryStyle.accent,
+
+              inset: 4,
+
+              title: (d) =>
+                `${d.day}
+${formatNumber(d.orders)} commandes`
+            }
+          ),
+
+
+          Plot.text(
+            dayData,
+            {
+              x: "day",
+              y: "orders",
+
+              text: (d) =>
+                formatNumber(
+                  d.orders
+                ),
+
+              dy: -10,
+
+              fill: "#fff7f2",
+
+              fontWeight: 700
+            }
+          )
+
+        ]
+      }}
+    />
+
+  </div>
+
+
+  <!-- TOP -->
+
+  <div
+    id={`pizza-panel-${slug}-top`}
+    class="graphic-panel"
+    data-panel="top"
+    role="tabpanel"
+    tabindex="0"
+    hidden
+  >
+
+    <PlotFigure
+      options={{
+        width: 900,
+        height: 560,
+
+        marginLeft: 250,
+        marginRight: 100,
+
+        style: plotStyle,
+
+        title:
+          `Pizzas les plus commandées — ${category}`,
+
+        ariaLabel:
+          `Classement des pizzas les plus commandées de la catégorie ${category}.`,
+
+        x: {
+          label: "Commandes",
+          grid: true
+        },
+
+        y: {
+          label: null,
+          domain:
+            topPizzas.map(
+              (item) =>
+                item.name
+            )
+        },
+
+        marks: [
+
+          Plot.barX(
+            topPizzas,
+            {
+              x: "orders",
+              y: "name",
+
+              fill:
+                categoryStyle.accent,
+
+              insetTop: 5,
+              insetBottom: 5,
+
+              title: (d) =>
+                `${d.name}
+Commandes : ${formatNumber(d.orders)}
+CA : ${formatMoney(d.revenue)}`
+            }
+          ),
+
+
+          Plot.text(
+            topPizzas,
+            {
+              x: "orders",
+              y: "name",
+
+              text: (d) =>
+                formatNumber(
+                  d.orders
+                ),
+
+              dx: 8,
+
+              textAnchor: "start",
+
+              fill: "#fff7f2",
+
+              fontWeight: 700
+            }
+          )
+
+        ]
+      }}
+    />
+
+  </div>
+
+
+  <!-- TEMPS -->
+
+  <div
+    id={`pizza-panel-${slug}-time`}
+    class="graphic-panel"
+    data-panel="time"
+    role="tabpanel"
+    tabindex="0"
+    hidden
+  >
+
+    <PlotFigure
+      options={{
+        width: 900,
+        height: 500,
+
+        marginLeft: 90,
+        marginBottom: 70,
+
+        style: plotStyle,
+
+        title:
+          `Évolution du chiffre d'affaires — ${category}`,
+
+        subtitle:
+          "Revenu cumulé par mois",
+
+        ariaLabel:
+          `Évolution mensuelle du chiffre d'affaires de la catégorie ${category}.`,
+
+        x: {
+          label: "Mois",
+
+          tickFormat:
+            (date: Date | number) =>
+              monthFormatter.format(
+                date
+              )
+        },
+
+        y: {
+          label: "Chiffre d'affaires",
+          grid: true
+        },
+
+        marks: [
+
+          Plot.lineY(
+            monthlyRevenue,
+            {
+              x: "date",
+              y: "revenue",
+
+              stroke:
+                categoryStyle.accent,
+
+              strokeWidth: 3
+            }
+          ),
+
+
+          Plot.dot(
+            monthlyRevenue,
+            {
+              x: "date",
+              y: "revenue",
+
+              fill:
+                categoryStyle.accent,
+
+              stroke: "#fff7f2",
+
+              r: 4,
+
+              title: (d) =>
+                `${monthFormatter.format(d.date)}
+${formatMoney(d.revenue)}`
+            }
+          )
+
+        ]
+      }}
+    />
+
+  </div>
+
+</section>
+
+
+<style>
+
+  .view-tab {
+    color: #ead8d0;
+    border-color: #765044;
+    background: transparent;
+    transition: 150ms;
+  }
+
+
+  .view-tab:hover {
+    background:
+      var(--pizza-soft);
+  }
+
+
+  .view-tab[aria-selected="true"] {
+    color: #211613;
+
+    background:
+      var(--pizza-accent);
+
+    border-color:
+      var(--pizza-accent);
+  }
+
+
+  .stat-card {
+    border-top:
+      3px solid
+      var(--pizza-accent);
+  }
+
+
+  @media (prefers-reduced-motion: reduce) {
+
+    .view-tab {
+      transition: none;
+    }
+
+  }
+
+</style>
+
+
+<script>
+
+  const initialisePizzaGraphics = () => {
+
+    const graphics =
+      document.querySelectorAll<HTMLElement>(
+        ".graphic-pizza"
+      );
+
+
+    graphics.forEach(
+      (graphic) => {
+
+        if (
+          graphic.dataset.tabsInitialised ===
+          "true"
+        ) {
+          return;
+        }
+
+
+        graphic.dataset.tabsInitialised =
+          "true";
+
+
+        const tabs =
+          Array.from(
+            graphic.querySelectorAll<HTMLButtonElement>(
+              '[role="tab"]'
+            )
+          );
+
+
+        const panels =
+          Array.from(
+            graphic.querySelectorAll<HTMLElement>(
+              '[role="tabpanel"]'
+            )
+          );
+
+
+        const description =
+          graphic.querySelector(
+            ".view-description"
+          );
+
+
+        const activateTab = (
+          selectedTab: HTMLButtonElement,
+          moveFocus = false
+        ) => {
+
+          const view =
+            selectedTab.dataset.view;
+
+
+          tabs.forEach(
+            (tab) => {
+
+              const active =
+                tab === selectedTab;
+
+
+              tab.setAttribute(
+                "aria-selected",
+                active
+                  ? "true"
+                  : "false"
+              );
+
+
+              tab.tabIndex =
+                active
+                  ? 0
+                  : -1;
+
+            }
+          );
+
+
+          panels.forEach(
+            (panel) => {
+
+              panel.hidden =
+                panel.dataset.panel !==
+                view;
+
+            }
+          );
+
+
+          if (
+            description &&
+            selectedTab.dataset.description
+          ) {
+
+            description.textContent =
+              selectedTab.dataset.description;
+
+          }
+
+
+          if (moveFocus) {
+            selectedTab.focus();
+          }
+
+        };
+
+
+        tabs.forEach(
+          (tab, index) => {
+
+            tab.addEventListener(
+              "click",
+              () =>
+                activateTab(tab)
+            );
+
+
+            tab.addEventListener(
+              "keydown",
+              (event: KeyboardEvent) => {
+
+                let next =
+                  index;
+
+
+                if (
+                  event.key ===
+                  "ArrowRight"
+                ) {
+
+                  next =
+                    (
+                      index + 1
+                    ) %
+                    tabs.length;
+
+                }
+
+                else if (
+                  event.key ===
+                  "ArrowLeft"
+                ) {
+
+                  next =
+                    (
+                      index - 1 +
+                      tabs.length
+                    ) %
+                    tabs.length;
+
+                }
+
+                else {
+
+                  return;
+
+                }
+
+
+                event.preventDefault();
+
+
+                activateTab(
+                  tabs[next],
+                  true
+                );
+
+              }
+            );
+
+          }
+        );
+
+      }
+    );
+
+  };
+
+
+  initialisePizzaGraphics();
+
+
+  document.addEventListener(
+    "astro:page-load",
+    initialisePizzaGraphics
+  );
+
+</script>

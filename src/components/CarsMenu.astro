@@ -1,0 +1,85 @@
+---
+interface Props {
+  current: 3 | 4 | 5 | 6 | 8;
+}
+
+const { current } = Astro.props as Props;
+
+const items = [
+  {
+    value: 3,
+    href: "/Cars/3-cylindres",
+    label: "3 cylindres"
+  },
+  {
+    value: 4,
+    href: "/Cars/4-cylindres",
+    label: "4 cylindres"
+  },
+  {
+    value: 5,
+    href: "/Cars/5-cylindres",
+    label: "5 cylindres"
+  },
+  {
+    value: 6,
+    href: "/Cars/6-cylindres",
+    label: "6 cylindres"
+  },
+  {
+    value: 8,
+    href: "/Cars/8-cylindres",
+    label: "8 cylindres"
+  }
+];
+---
+
+<nav
+  class="mt-10 flex flex-wrap gap-3"
+  aria-label="Navigation entre les configurations moteur"
+>
+
+  {
+    items.map((item) => (
+
+      <a
+        href={item.href}
+        aria-current={
+          current === item.value
+            ? "page"
+            : undefined
+        }
+        class:list={[
+          "rounded-full border px-5 py-2.5 text-sm font-semibold transition",
+          "focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[#72a7cf]",
+
+          current === item.value
+            ? "border-[#72a7cf] bg-[#72a7cf] text-[#111b23]"
+            : "border-[#456174] bg-[#18232c] text-[#d4e1e9] hover:bg-[#22313d]"
+        ]}
+      >
+        {item.label}
+      </a>
+
+    ))
+  }
+
+
+  <a
+    href="/Slider"
+    class="rounded-full
+           border border-[#456174]
+           bg-transparent
+           px-5 py-2.5
+           text-sm font-semibold
+           text-[#9fc3dd]
+           transition
+           hover:bg-[#22313d]
+           focus-visible:outline-4
+           focus-visible:outline-offset-4
+           focus-visible:outline-[#72a7cf]"
+  >
+    Slider général →
+  </a>
+
+</nav>

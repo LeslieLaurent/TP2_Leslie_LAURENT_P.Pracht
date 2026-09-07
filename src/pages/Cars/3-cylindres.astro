@@ -1,0 +1,54 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import CarsMenu from "../../components/CarsMenu.astro";
+import GraphicCars from "../../components/GraphicCars.astro";
+---
+
+<Layout title="Cars — 3 cylindres">
+
+  <main
+    class="mx-auto max-w-7xl
+           px-6 py-16
+           lg:px-10"
+  >
+
+    <a
+      href="/"
+      class="text-sm font-medium
+             text-[#9fc3dd]
+             hover:text-[#72a7cf]"
+    >
+      ← Retour à l'accueil
+    </a>
+
+
+    <section class="py-16">
+
+      <p
+        class="text-sm font-bold
+               uppercase tracking-[0.2em]
+               text-[#72a7cf]"
+      >
+        Bonus TP2 · Cars
+      </p>
+
+      <h1
+        class="mt-4 text-5xl
+               font-bold text-[#f5f9fc]
+               md:text-7xl"
+      >
+        3 cylindres
+      </h1>
+
+      <CarsMenu current={3} />
+
+    </section>
+
+
+    <section class="pb-20">
+      <GraphicCars cylinders={3} />
+    </section>
+
+  </main>
+
+</Layout>

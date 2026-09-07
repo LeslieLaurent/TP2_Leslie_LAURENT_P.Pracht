@@ -1,0 +1,72 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import GraphicCars from "../../components/GraphicCars.astro";
+---
+
+<Layout title="Cars — Exploration interactive">
+
+  <main
+    class="mx-auto max-w-7xl
+           px-6 py-16
+           lg:px-10"
+  >
+
+    <a
+      href="/"
+      class="text-sm font-medium
+             text-[#9fb1bd]
+             transition
+             hover:text-[#72a7cf]
+             focus-visible:ring-2"
+    >
+      ← Toutes les explorations
+    </a>
+
+
+    <section class="py-20">
+
+      <p
+        class="mb-4 text-sm font-bold
+               uppercase tracking-[0.2em]
+               text-[#72a7cf]"
+      >
+        Exploration enrichie · Cars
+      </p>
+
+
+      <h1
+        class="max-w-5xl
+               text-6xl font-bold
+               leading-[0.95]
+               tracking-tight
+               text-[#f4e9e3]
+               md:text-8xl"
+      >
+        Comprendre les
+        <span class="block text-[#72a7cf]">
+          performances automobiles.
+        </span>
+      </h1>
+
+
+      <p
+        class="mt-7 max-w-2xl
+               text-lg leading-8
+               text-[#c2aeb3]"
+      >
+        Une exploration interactive du dataset Cars :
+        performances, poids et évolution de la consommation.
+      </p>
+
+    </section>
+
+
+    <section class="pb-20">
+
+      <GraphicCars />
+
+    </section>
+
+  </main>
+
+</Layout>

@@ -1,0 +1,63 @@
+---
+interface Props {
+  current:
+    | "Classic"
+    | "Specialty"
+    | "Vegetarian";
+}
+
+const { current } =
+  Astro.props as Props;
+
+const categories = [
+  "Classic",
+  "Specialty",
+  "Vegetarian"
+] as const;
+---
+
+<nav
+  class="mt-10 flex
+         flex-wrap gap-3"
+  aria-label="Navigation entre les catégories de pizzas"
+>
+
+  {
+    categories.map(
+      (category) => (
+
+        <a
+          href={`/Pizza/${category}`}
+          aria-current={
+            current === category
+              ? "page"
+              : undefined
+          }
+          class:list={[
+            "rounded-full border px-5 py-2.5 text-sm font-semibold transition",
+            current === category
+              ? "border-[#e2875d] bg-[#e2875d] text-[#211613]"
+              : "border-[#765044] bg-[#291b18] text-[#ead8d0] hover:bg-[#3c251e]"
+          ]}
+        >
+          {category}
+        </a>
+
+      )
+    )
+  }
+
+
+  <a
+    href="/Slider"
+    class="rounded-full
+           border border-[#765044]
+           px-5 py-2.5
+           text-sm font-semibold
+           text-[#e8ad91]
+           hover:bg-[#3c251e]"
+  >
+    Slider général →
+  </a>
+
+</nav>

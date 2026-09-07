@@ -1,0 +1,1138 @@
+---
+import * as Plot from "@observablehq/plot";
+import { csvParse } from "d3-dsv";
+
+import PlotFigure from "./PlotFigure.astro";
+import carsCSV from "../data/cars.csv?raw";
+
+interface Props {
+  cylinders?: 3 | 4 | 5 | 6 | 8;
+}
+
+const { cylinders = 4 } = Astro.props as Partial<Props>;
+
+const carsRaw = csvParse(carsCSV);
+
+const cars = carsRaw.map((car) => ({
+  name: car.name,
+
+  economy:
+    car["economy (mpg)"]
+      ? Number(car["economy (mpg)"])
+      : null,
+
+  cylinders:
+    car.cylinders
+      ? Number(car.cylinders)
+      : null,
+
+  power:
+    car["power (hp)"]
+      ? Number(car["power (hp)"])
+      : null,
+
+  weight:
+    car["weight (lb)"]
+      ? Number(car["weight (lb)"])
+      : null,
+
+  acceleration:
+    car["0-60 mph (s)"]
+      ? Number(car["0-60 mph (s)"])
+      : null,
+
+  year:
+    car.year
+      ? Number(car.year)
+      : null
+}));
+
+
+const cylinderStyles = {
+  3: {
+    accent: "#d890b5",
+    soft: "#3a2230"
+  },
+
+  4: {
+    accent: "#72a7cf",
+    soft: "#1d2d3a"
+  },
+
+  5: {
+    accent: "#9d8bd8",
+    soft: "#29233c"
+  },
+
+  6: {
+    accent: "#d8ae61",
+    soft: "#382e1d"
+  },
+
+  8: {
+    accent: "#d36c67",
+    soft: "#3b2020"
+  }
+} as const;
+
+
+const cylinderStyle =
+  cylinderStyles[cylinders];
+
+
+const slug =
+  `${cylinders}-cylinders`;
+
+
+/* ------------------------------------------------ */
+/* STATISTIQUES                                     */
+/* ------------------------------------------------ */
+
+const stats = cars.reduce(
+  (acc, car) => {
+
+    if (car.cylinders !== cylinders) {
+      return acc;
+    }
+
+    acc.count += 1;
+
+
+    if (car.economy !== null) {
+      acc.totalEconomy += car.economy;
+      acc.economyCount += 1;
+    }
+
+
+    if (car.power !== null) {
+      acc.totalPower += car.power;
+      acc.powerCount += 1;
+    }
+
+
+    if (car.weight !== null) {
+      acc.totalWeight += car.weight;
+      acc.weightCount += 1;
+    }
+
+
+    if (car.acceleration !== null) {
+      acc.totalAcceleration += car.acceleration;
+      acc.accelerationCount += 1;
+    }
+
+
+    return acc;
+  },
+
+  {
+    count: 0,
+
+    totalEconomy: 0,
+    economyCount: 0,
+
+    totalPower: 0,
+    powerCount: 0,
+
+    totalWeight: 0,
+    weightCount: 0,
+
+    totalAcceleration: 0,
+    accelerationCount: 0
+  }
+);
+
+
+const averageEconomy =
+  stats.economyCount > 0
+    ? stats.totalEconomy /
+      stats.economyCount
+    : 0;
+
+
+const averagePower =
+  stats.powerCount > 0
+    ? stats.totalPower /
+      stats.powerCount
+    : 0;
+
+
+const averageWeight =
+  stats.weightCount > 0
+    ? stats.totalWeight /
+      stats.weightCount
+    : 0;
+
+
+const averageAcceleration =
+  stats.accelerationCount > 0
+    ? stats.totalAcceleration /
+      stats.accelerationCount
+    : 0;
+
+
+const formatNumber = (value: number) =>
+  new Intl.NumberFormat(
+    "fr-FR",
+    {
+      maximumFractionDigits: 1
+    }
+  ).format(value);
+
+
+/* ------------------------------------------------ */
+/* FILTRES PLOT                                     */
+/* ------------------------------------------------ */
+
+type Car = typeof cars[number];
+
+const validPerformance = (d: Car) =>
+  d.cylinders === cylinders &&
+  d.power !== null &&
+  d.economy !== null;
+
+
+const validWeight = (d: Car) =>
+  d.cylinders === cylinders &&
+  d.weight !== null;
+
+
+/* ------------------------------------------------ */
+/* ÉVOLUTION PAR ANNÉE                              */
+/* ------------------------------------------------ */
+
+const yearlyMap =
+  new Map<
+    number,
+    {
+      economy: number;
+      count: number;
+    }
+  >();
+
+
+cars.forEach((car) => {
+
+  if (
+    car.cylinders !== cylinders ||
+    car.year === null ||
+    car.economy === null
+  ) {
+    return;
+  }
+
+
+  const current =
+    yearlyMap.get(car.year) ?? {
+      economy: 0,
+      count: 0
+    };
+
+
+  current.economy += car.economy;
+  current.count += 1;
+
+
+  yearlyMap.set(
+    car.year,
+    current
+  );
+
+});
+
+
+const yearlyEconomy =
+  Array.from(
+    yearlyMap,
+    ([year, values]) => ({
+      year,
+
+      economy:
+        values.economy /
+        values.count
+    })
+  ).sort(
+    (a, b) =>
+      a.year - b.year
+  );
+
+
+/* ------------------------------------------------ */
+/* STYLE PLOT                                       */
+/* ------------------------------------------------ */
+
+const plotStyle = {
+  backgroundColor: "#18232c",
+  color: "#f5f9fc",
+  padding: "16px",
+  fontSize: "13px"
+};
+---
+
+<section
+  class="graphic-cars
+         rounded-3xl
+         border border-[#32495a]
+         bg-[#111b23]
+         p-5
+         md:p-10"
+  data-cylinders={cylinders}
+  aria-labelledby={`cars-title-${slug}`}
+  style={`
+    --cars-accent: ${cylinderStyle.accent};
+    --cars-soft: ${cylinderStyle.soft};
+  `}
+>
+
+  <!-- EN-TÊTE -->
+
+  <header class="mb-10">
+
+    <div
+      class="mb-4
+             flex items-center gap-3"
+    >
+
+      <span
+        class="h-3 w-3 rounded-full"
+        style={`background-color: ${cylinderStyle.accent};`}
+        aria-hidden="true"
+      >
+      </span>
+
+      <p
+        class="text-sm font-bold
+               uppercase
+               tracking-[0.18em]
+               text-[#9fc3dd]"
+      >
+        Configuration moteur
+      </p>
+
+    </div>
+
+
+    <h3
+      id={`cars-title-${slug}`}
+      class="text-4xl font-bold
+             tracking-tight
+             text-[#f5f9fc]
+             md:text-5xl"
+    >
+      {cylinders} cylindres
+    </h3>
+
+
+    <p
+      class="mt-4 max-w-3xl
+             leading-7
+             text-[#b8cbd8]"
+    >
+      Explorer les performances des véhicules
+      équipés d'un moteur à {cylinders} cylindres.
+    </p>
+
+  </header>
+
+
+  <!-- STATS -->
+
+  <dl
+    class="mb-12
+           grid gap-4
+           sm:grid-cols-2
+           xl:grid-cols-4"
+    aria-label={`Résumé des voitures à ${cylinders} cylindres`}
+  >
+
+    <div
+      class="stat-card
+             rounded-2xl
+             border border-[#32495a]
+             bg-[#18232c]
+             p-5"
+    >
+      <dt class="text-sm text-[#b8cbd8]">
+        Véhicules
+      </dt>
+
+      <dd
+        class="mt-2
+               text-3xl
+               font-bold
+               text-white"
+      >
+        {stats.count}
+      </dd>
+    </div>
+
+
+    <div
+      class="stat-card
+             rounded-2xl
+             border border-[#32495a]
+             bg-[#18232c]
+             p-5"
+    >
+      <dt class="text-sm text-[#b8cbd8]">
+        Puissance moyenne
+      </dt>
+
+      <dd
+        class="mt-2
+               text-3xl
+               font-bold
+               text-white"
+      >
+        {formatNumber(averagePower)}
+
+        <span
+          class="text-base
+                 font-normal
+                 text-[#b8cbd8]"
+        >
+          hp
+        </span>
+      </dd>
+    </div>
+
+
+    <div
+      class="stat-card
+             rounded-2xl
+             border border-[#32495a]
+             bg-[#18232c]
+             p-5"
+    >
+      <dt class="text-sm text-[#b8cbd8]">
+        Économie moyenne
+      </dt>
+
+      <dd
+        class="mt-2
+               text-3xl
+               font-bold
+               text-white"
+      >
+        {formatNumber(averageEconomy)}
+
+        <span
+          class="text-base
+                 font-normal
+                 text-[#b8cbd8]"
+        >
+          mpg
+        </span>
+      </dd>
+    </div>
+
+
+    <div
+      class="stat-card
+             rounded-2xl
+             border border-[#32495a]
+             bg-[#18232c]
+             p-5"
+    >
+      <dt class="text-sm text-[#b8cbd8]">
+        0–60 mph moyen
+      </dt>
+
+      <dd
+        class="mt-2
+               text-3xl
+               font-bold
+               text-white"
+      >
+        {formatNumber(averageAcceleration)}
+
+        <span
+          class="text-base
+                 font-normal
+                 text-[#b8cbd8]"
+        >
+          s
+        </span>
+      </dd>
+    </div>
+
+  </dl>
+
+
+  <!-- TABS -->
+
+  <div class="mb-8">
+
+    <p
+      class="mb-4
+             text-sm font-bold
+             uppercase
+             tracking-[0.16em]
+             text-[#9fc3dd]"
+    >
+      Explorer les données
+    </p>
+
+
+    <div
+      class="flex flex-wrap gap-3"
+      role="tablist"
+      aria-label={`Graphiques des voitures à ${cylinders} cylindres`}
+    >
+
+      <button
+        id={`cars-tab-${slug}-performance`}
+        type="button"
+        role="tab"
+        aria-selected="true"
+        aria-controls={`cars-panel-${slug}-performance`}
+        data-view="performance"
+        data-description="Comparer la puissance du moteur et l'économie de carburant pour chaque véhicule."
+        class="view-tab
+               min-h-11
+               rounded-full
+               border
+               px-5 py-3
+               text-sm font-bold
+               transition
+               focus-visible:outline-4
+               focus-visible:outline-offset-4
+               focus-visible:outline-white"
+      >
+        Puissance & consommation
+      </button>
+
+
+      <button
+        id={`cars-tab-${slug}-weight`}
+        type="button"
+        role="tab"
+        aria-selected="false"
+        aria-controls={`cars-panel-${slug}-weight`}
+        tabindex="-1"
+        data-view="weight"
+        data-description="Observer comment se répartit le poids des véhicules de cette configuration moteur."
+        class="view-tab
+               min-h-11
+               rounded-full
+               border
+               px-5 py-3
+               text-sm font-bold
+               transition
+               focus-visible:outline-4
+               focus-visible:outline-offset-4
+               focus-visible:outline-white"
+      >
+        Répartition du poids
+      </button>
+
+
+      <button
+        id={`cars-tab-${slug}-evolution`}
+        type="button"
+        role="tab"
+        aria-selected="false"
+        aria-controls={`cars-panel-${slug}-evolution`}
+        tabindex="-1"
+        data-view="evolution"
+        data-description="Observer l'évolution de l'économie moyenne de carburant selon l'année."
+        class="view-tab
+               min-h-11
+               rounded-full
+               border
+               px-5 py-3
+               text-sm font-bold
+               transition
+               focus-visible:outline-4
+               focus-visible:outline-offset-4
+               focus-visible:outline-white"
+      >
+        Évolution
+      </button>
+
+    </div>
+
+
+    <p
+      class="view-description
+             mt-5 max-w-3xl
+             border-l-4
+             pl-4
+             leading-7
+             text-[#d4e1e9]"
+      style={`border-color: ${cylinderStyle.accent};`}
+      aria-live="polite"
+    >
+      Comparer la puissance du moteur et
+      l'économie de carburant pour chaque véhicule.
+    </p>
+
+  </div>
+
+
+  <!-- PERFORMANCE -->
+
+  <div
+    id={`cars-panel-${slug}-performance`}
+    class="graphic-panel"
+    data-panel="performance"
+    role="tabpanel"
+    aria-labelledby={`cars-tab-${slug}-performance`}
+    tabindex="0"
+  >
+
+    <div
+      class="overflow-hidden
+             rounded-2xl
+             border border-[#32495a]"
+    >
+
+      <PlotFigure
+        options={{
+          width: 900,
+          height: 500,
+
+          marginLeft: 70,
+          marginBottom: 60,
+          marginTop: 45,
+
+          style: plotStyle,
+
+          title:
+            `Puissance et consommation — ${cylinders} cylindres`,
+
+          subtitle:
+            "Chaque point représente un véhicule",
+
+          caption:
+            `Seules les voitures à ${cylinders} cylindres sont affichées.`,
+
+          ariaLabel:
+            `Nuage de points des voitures à ${cylinders} cylindres.`,
+
+          ariaDescription:
+            "L'axe horizontal représente la puissance en chevaux et l'axe vertical l'économie de carburant en miles par gallon.",
+
+          x: {
+            label: "Puissance (hp)",
+            grid: true,
+            nice: true
+          },
+
+          y: {
+            label: "Économie de carburant (mpg)",
+            grid: true,
+            nice: true
+          },
+
+          marks: [
+
+            Plot.frame({
+              stroke: "#456174",
+              strokeOpacity: 0.7
+            }),
+
+
+            Plot.dot(
+              cars,
+              {
+                filter: validPerformance,
+
+                x: "power",
+                y: "economy",
+
+                fill:
+                  cylinderStyle.accent,
+
+                stroke: "#f5f9fc",
+
+                strokeWidth: 0.8,
+
+                r: 5,
+
+                opacity: 0.72,
+
+                title: (d) =>
+                  `${d.name}
+Puissance : ${d.power} hp
+Économie : ${d.economy} mpg
+Poids : ${d.weight ?? "Non renseigné"} lb`
+              }
+            )
+
+          ]
+        }}
+      />
+
+    </div>
+
+  </div>
+
+
+  <!-- POIDS -->
+
+  <div
+    id={`cars-panel-${slug}-weight`}
+    class="graphic-panel"
+    data-panel="weight"
+    role="tabpanel"
+    aria-labelledby={`cars-tab-${slug}-weight`}
+    tabindex="0"
+    hidden
+  >
+
+    <div
+      class="overflow-hidden
+             rounded-2xl
+             border border-[#32495a]"
+    >
+
+      <PlotFigure
+        options={{
+          width: 900,
+          height: 470,
+
+          marginLeft: 70,
+          marginBottom: 60,
+          marginTop: 45,
+
+          style: plotStyle,
+
+          title:
+            `Répartition du poids — ${cylinders} cylindres`,
+
+          subtitle:
+            "Nombre de véhicules par tranche de poids",
+
+          caption:
+            `Poids moyen : ${formatNumber(averageWeight)} lb.`,
+
+          ariaLabel:
+            `Histogramme du poids des voitures à ${cylinders} cylindres.`,
+
+          ariaDescription:
+            "L'axe horizontal représente le poids des véhicules et l'axe vertical leur nombre.",
+
+          x: {
+            label: "Poids (lb)",
+            nice: true
+          },
+
+          y: {
+            label: "Nombre de véhicules",
+            grid: true,
+            nice: true
+          },
+
+          marks: [
+
+            Plot.frame({
+              stroke: "#456174",
+              strokeOpacity: 0.7
+            }),
+
+
+            Plot.rectY(
+              cars.filter(validWeight),
+
+              {
+                ...Plot.binX(
+                  { y: "count" },
+                  {
+                    x: "weight",
+                    thresholds: 10
+                  }
+                ),
+                fill: cylinderStyle.accent,
+                fillOpacity: 0.9,
+                stroke: "#111b23",
+                inset: 1
+              }
+            ),
+
+
+            Plot.ruleX(
+              [averageWeight],
+              {
+                stroke: "#f5f9fc",
+                strokeWidth: 2,
+                strokeDasharray: "6,4"
+              }
+            )
+
+          ]
+        }}
+      />
+
+    </div>
+
+
+    <p
+      class="mt-4
+             text-sm
+             text-[#b8cbd8]"
+    >
+      ┊ La ligne pointillée représente le poids moyen :
+      {formatNumber(averageWeight)} lb.
+    </p>
+
+  </div>
+
+
+  <!-- ÉVOLUTION -->
+
+  <div
+    id={`cars-panel-${slug}-evolution`}
+    class="graphic-panel"
+    data-panel="evolution"
+    role="tabpanel"
+    aria-labelledby={`cars-tab-${slug}-evolution`}
+    tabindex="0"
+    hidden
+  >
+
+    <div
+      class="overflow-hidden
+             rounded-2xl
+             border border-[#32495a]"
+    >
+
+      <PlotFigure
+        options={{
+          width: 900,
+          height: 470,
+
+          marginLeft: 70,
+          marginBottom: 60,
+          marginTop: 45,
+
+          style: plotStyle,
+
+          title:
+            `Évolution de la consommation — ${cylinders} cylindres`,
+
+          subtitle:
+            "Économie moyenne de carburant par année",
+
+          caption:
+            "Chaque point correspond à la moyenne des véhicules présents pour l'année.",
+
+          ariaLabel:
+            `Évolution de l'économie de carburant des voitures à ${cylinders} cylindres.`,
+
+          ariaDescription:
+            "L'axe horizontal représente les années et l'axe vertical la moyenne des miles parcourus par gallon.",
+
+          x: {
+            label: "Année",
+            grid: true
+          },
+
+          y: {
+            label: "Économie moyenne (mpg)",
+            grid: true,
+            nice: true
+          },
+
+          marks: [
+
+            Plot.frame({
+              stroke: "#456174",
+              strokeOpacity: 0.7
+            }),
+
+
+            Plot.lineY(
+              yearlyEconomy,
+              {
+                x: "year",
+                y: "economy",
+
+                stroke:
+                  cylinderStyle.accent,
+
+                strokeWidth: 3
+              }
+            ),
+
+
+            Plot.dot(
+              yearlyEconomy,
+              {
+                x: "year",
+                y: "economy",
+
+                fill:
+                  cylinderStyle.accent,
+
+                stroke: "#f5f9fc",
+
+                r: 5,
+
+                title: (d) =>
+                  `${d.year}
+Moyenne : ${formatNumber(d.economy)} mpg`
+              }
+            )
+
+          ]
+        }}
+      />
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<style>
+
+  .view-tab {
+    color: #d4e1e9;
+    border-color: #456174;
+    background: transparent;
+  }
+
+
+  .view-tab:hover {
+    background:
+      var(--cars-soft);
+  }
+
+
+  .view-tab[aria-selected="true"] {
+    color: #111b23;
+
+    background:
+      var(--cars-accent);
+
+    border-color:
+      var(--cars-accent);
+  }
+
+
+  .stat-card {
+    border-top:
+      3px solid
+      var(--cars-accent);
+  }
+
+
+  @media (prefers-reduced-motion: reduce) {
+
+    .view-tab {
+      transition: none;
+    }
+
+  }
+
+</style>
+
+
+<script>
+
+  const initialiseCarsGraphics = () => {
+
+    const graphics =
+      document.querySelectorAll<HTMLElement>(
+        ".graphic-cars"
+      );
+
+
+    graphics.forEach(
+      (graphic) => {
+
+        if (
+          graphic.dataset.tabsInitialised ===
+          "true"
+        ) {
+          return;
+        }
+
+
+        graphic.dataset.tabsInitialised =
+          "true";
+
+
+        const tabs =
+          Array.from(
+            graphic.querySelectorAll<HTMLButtonElement>(
+              '[role="tab"]'
+            )
+          );
+
+
+        const panels =
+          Array.from(
+            graphic.querySelectorAll<HTMLElement>(
+              '[role="tabpanel"]'
+            )
+          );
+
+
+        const description =
+          graphic.querySelector(
+            ".view-description"
+          );
+
+
+        const activateTab = (
+          selectedTab: HTMLButtonElement,
+          moveFocus = false
+        ) => {
+
+          const view =
+            selectedTab.dataset.view;
+
+
+          tabs.forEach(
+            (tab) => {
+
+              const active =
+                tab === selectedTab;
+
+
+              tab.setAttribute(
+                "aria-selected",
+                active
+                  ? "true"
+                  : "false"
+              );
+
+
+              tab.tabIndex =
+                active
+                  ? 0
+                  : -1;
+
+            }
+          );
+
+
+          panels.forEach(
+            (panel) => {
+
+              panel.hidden =
+                panel.dataset.panel !==
+                view;
+
+            }
+          );
+
+
+          if (
+            description &&
+            selectedTab.dataset.description
+          ) {
+
+            description.textContent =
+              selectedTab.dataset.description;
+
+          }
+
+
+          if (moveFocus) {
+            selectedTab.focus();
+          }
+
+        };
+
+
+        tabs.forEach(
+          (tab, index) => {
+
+            tab.addEventListener(
+              "click",
+              () => {
+
+                activateTab(tab);
+
+              }
+            );
+
+
+            tab.addEventListener(
+              "keydown",
+              (event: KeyboardEvent) => {
+
+                let nextIndex =
+                  index;
+
+
+                if (
+                  event.key === "ArrowRight"
+                ) {
+
+                  nextIndex =
+                    (index + 1) %
+                    tabs.length;
+
+                }
+
+                else if (
+                  event.key === "ArrowLeft"
+                ) {
+
+                  nextIndex =
+                    (
+                      index - 1 +
+                      tabs.length
+                    ) %
+                    tabs.length;
+
+                }
+
+                else if (
+                  event.key === "Home"
+                ) {
+
+                  nextIndex = 0;
+
+                }
+
+                else if (
+                  event.key === "End"
+                ) {
+
+                  nextIndex =
+                    tabs.length - 1;
+
+                }
+
+                else {
+
+                  return;
+
+                }
+
+
+                event.preventDefault();
+
+
+                activateTab(
+                  tabs[nextIndex],
+                  true
+                );
+
+              }
+            );
+
+          }
+        );
+
+      }
+    );
+
+  };
+
+
+  initialiseCarsGraphics();
+
+
+  document.addEventListener(
+    "astro:page-load",
+    initialiseCarsGraphics
+  );
+
+</script>

@@ -9,57 +9,1275 @@ interface Props {
 }
 
 const { species } = Astro.props as Props;
+
+
+/* ------------------------------------------------ */
+/* IDENTITÉ VISUELLE PAR ESPÈCE                     */
+/* ------------------------------------------------ */
+
+const speciesStyles = {
+  Adelie: {
+    accent: "#e890b0",
+    soft: "#3b202b"
+  },
+
+  Gentoo: {
+    accent: "#7eb8e8",
+    soft: "#1d2c38"
+  },
+
+  Chinstrap: {
+    accent: "#e8c56a",
+    soft: "#372f1c"
+  }
+};
+
+const speciesStyle = speciesStyles[species];
+
+const slug = species.toLowerCase();
+type Penguin = typeof penguins[number];
+
+
+/* ------------------------------------------------ */
+/* STATISTIQUES                                     */
+/* ------------------------------------------------ */
+
+const stats = penguins.reduce(
+  (acc, penguin) => {
+
+    if (penguin.species !== species) {
+      return acc;
+    }
+
+    acc.count += 1;
+
+
+    if (
+      penguin.body_mass_g !== null &&
+      penguin.body_mass_g !== undefined
+    ) {
+      acc.totalWeight += Number(penguin.body_mass_g);
+      acc.weightCount += 1;
+    }
+
+
+    if (
+      penguin.culmen_length_mm !== null &&
+      penguin.culmen_length_mm !== undefined
+    ) {
+      acc.totalBillLength += Number(penguin.culmen_length_mm);
+      acc.billLengthCount += 1;
+    }
+
+
+    if (
+      penguin.culmen_depth_mm !== null &&
+      penguin.culmen_depth_mm !== undefined
+    ) {
+      acc.totalBillDepth += Number(penguin.culmen_depth_mm);
+      acc.billDepthCount += 1;
+    }
+
+
+    if (
+      penguin.flipper_length_mm !== null &&
+      penguin.flipper_length_mm !== undefined
+    ) {
+      acc.totalFlipper += Number(penguin.flipper_length_mm);
+      acc.flipperCount += 1;
+    }
+
+
+    return acc;
+  },
+
+  {
+    count: 0,
+
+    totalWeight: 0,
+    weightCount: 0,
+
+    totalBillLength: 0,
+    billLengthCount: 0,
+
+    totalBillDepth: 0,
+    billDepthCount: 0,
+
+    totalFlipper: 0,
+    flipperCount: 0
+  }
+);
+
+
+const averageWeight =
+  stats.weightCount > 0
+    ? stats.totalWeight / stats.weightCount
+    : 0;
+
+
+const averageBillLength =
+  stats.billLengthCount > 0
+    ? stats.totalBillLength / stats.billLengthCount
+    : 0;
+
+
+const averageBillDepth =
+  stats.billDepthCount > 0
+    ? stats.totalBillDepth / stats.billDepthCount
+    : 0;
+
+
+const averageFlipper =
+  stats.flipperCount > 0
+    ? stats.totalFlipper / stats.flipperCount
+    : 0;
+
+
+const formatNumber = (value: number) =>
+  new Intl.NumberFormat(
+    "fr-FR",
+    {
+      maximumFractionDigits: 1
+    }
+  ).format(value);
+
+
+/* ------------------------------------------------ */
+/* FILTRES UTILISÉS DIRECTEMENT DANS PLOT           */
+/* ------------------------------------------------ */
+
+const validBill = (d: Penguin) =>
+  d.species === species &&
+  d.culmen_length_mm != null &&
+  d.culmen_depth_mm != null;
+
+
+const validWeight = (d: Penguin) =>
+  d.species === species &&
+  d.body_mass_g != null;
+
+
+const validFlipper = (d: Penguin) =>
+  d.species === species &&
+  d.flipper_length_mm != null;
+
+
+/* ------------------------------------------------ */
+/* STYLE COMMUN AUX GRAPHIQUES                      */
+/* ------------------------------------------------ */
+
+const plotStyle = {
+  backgroundColor: "#2b1821",
+  color: "#fff7fa",
+  padding: "16px",
+  fontSize: "13px"
+};
 ---
 
-<div
-    class="rounded-3xl border border-[#4b2936]
-      bg-[#21131b] p-5 shadow-sm md:p-10"
+<section
+  class="graphic-species
+         rounded-3xl
+         border border-[#4b2936]
+         bg-[#21131b]
+         p-5 shadow-sm
+         md:p-10"
+  data-species={species}
+  aria-labelledby={`graphic-${slug}`}
+  style={`
+    --species-accent: ${speciesStyle.accent};
+    --species-soft: ${speciesStyle.soft};
+  `}
 >
-  <PlotFigure
-    options={{
-      width: 900,
 
-      title: `Morphologie des manchots ${species}`,
+  <!-- ================================================== -->
+  <!-- EN-TÊTE                                            -->
+  <!-- ================================================== -->
 
-      subtitle:
-        "Longueur et profondeur du bec",
+  <header class="mb-10">
 
-      caption:
-        `Seuls les manchots de l'espèce ${species} sont affichés.`,
+    <div class="mb-4 flex items-center gap-3">
 
-      ariaLabel:
-        `Nuage de points représentant uniquement les manchots ${species}.`,
+      <span
+        class="h-3 w-3 rounded-full"
+        style={`background-color: ${speciesStyle.accent};`}
+        aria-hidden="true"
+      >
+      </span>
 
-      ariaDescription:
-        `Le graphique compare la longueur et la profondeur du bec des manchots appartenant à l'espèce ${species}.`,
+      <p
+        class="text-sm font-bold uppercase
+               tracking-[0.18em]
+               text-[#d4a5b5]"
+      >
+        Données de l'espèce
+      </p>
 
-      x: {
-        label: "Longueur du bec (mm)",
-        grid: true
-      },
+    </div>
 
-      y: {
-        label: "Profondeur du bec (mm)",
-        grid: true
-      },
 
-      marks: [
-        Plot.dot(penguins, {
-          filter: (d) => d.species === species,
+    <h3
+      id={`graphic-${slug}`}
+      class="text-4xl font-bold
+             tracking-tight
+             text-[#fff7fa]
+             md:text-5xl"
+    >
+      {species}
+    </h3>
 
-          x: "culmen_length_mm",
-          y: "culmen_depth_mm",
 
-          fill: "species",
+    <p
+      class="mt-4 max-w-3xl
+             text-base leading-7
+             text-[#cdbbc2]"
+    >
+      Explore différentes caractéristiques morphologiques
+      de cette espèce à travers plusieurs représentations
+      adaptées aux données.
+    </p>
 
-          r: 5,
-          opacity: 0.8,
+  </header>
 
-          title: (d) =>
-            `${d.species}
-Bec : ${d.culmen_length_mm} × ${d.culmen_depth_mm} mm`
-        })
-      ]
-    }}
-  />
-</div>
+
+  <!-- ================================================== -->
+  <!-- STATISTIQUES                                       -->
+  <!-- ================================================== -->
+
+  <dl
+    class="mb-12 grid gap-4
+           sm:grid-cols-2
+           xl:grid-cols-4"
+    aria-label={`Résumé statistique des manchots ${species}`}
+  >
+
+    <!-- INDIVIDUS -->
+
+    <div
+      class="stat-card
+             rounded-2xl
+             border border-[#5d3544]
+             bg-[#2b1821]
+             p-5"
+    >
+
+      <dt class="text-sm text-[#cdbbc2]">
+        Individus
+      </dt>
+
+      <dd
+        class="mt-2 text-3xl
+               font-bold text-[#fff7fa]"
+      >
+        {stats.count}
+      </dd>
+
+    </div>
+
+
+    <!-- POIDS -->
+
+    <div
+      class="stat-card
+             rounded-2xl
+             border border-[#5d3544]
+             bg-[#2b1821]
+             p-5"
+    >
+
+      <dt class="text-sm text-[#cdbbc2]">
+        Poids moyen
+      </dt>
+
+      <dd
+        class="mt-2 text-3xl
+               font-bold text-[#fff7fa]"
+      >
+        {formatNumber(averageWeight)}
+
+        <span
+          class="text-base
+                 font-normal
+                 text-[#cdbbc2]"
+        >
+          g
+        </span>
+      </dd>
+
+    </div>
+
+
+    <!-- BEC -->
+
+    <div
+      class="stat-card
+             rounded-2xl
+             border border-[#5d3544]
+             bg-[#2b1821]
+             p-5"
+    >
+
+      <dt class="text-sm text-[#cdbbc2]">
+        Bec moyen
+      </dt>
+
+      <dd
+        class="mt-2 text-2xl
+               font-bold text-[#fff7fa]"
+      >
+        {formatNumber(averageBillLength)}
+        ×
+        {formatNumber(averageBillDepth)}
+
+        <span
+          class="text-base
+                 font-normal
+                 text-[#cdbbc2]"
+        >
+          mm
+        </span>
+      </dd>
+
+    </div>
+
+
+    <!-- NAGEOIRE -->
+
+    <div
+      class="stat-card
+             rounded-2xl
+             border border-[#5d3544]
+             bg-[#2b1821]
+             p-5"
+    >
+
+      <dt class="text-sm text-[#cdbbc2]">
+        Nageoire moyenne
+      </dt>
+
+      <dd
+        class="mt-2 text-3xl
+               font-bold text-[#fff7fa]"
+      >
+        {formatNumber(averageFlipper)}
+
+        <span
+          class="text-base
+                 font-normal
+                 text-[#cdbbc2]"
+        >
+          mm
+        </span>
+      </dd>
+
+    </div>
+
+  </dl>
+
+
+  <!-- ================================================== -->
+  <!-- CHOIX DU GRAPHIQUE                                 -->
+  <!-- ================================================== -->
+
+  <div class="mb-8">
+
+    <p
+      class="mb-4 text-sm font-bold
+             uppercase tracking-[0.16em]
+             text-[#d4a5b5]"
+    >
+      Explorer les données
+    </p>
+
+
+    <div
+      class="flex flex-wrap gap-3"
+      role="tablist"
+      aria-label={`Choisir un graphique pour ${species}`}
+    >
+
+      <!-- MORPHOLOGIE -->
+
+      <button
+        id={`tab-${slug}-bill`}
+        type="button"
+        role="tab"
+        aria-selected="true"
+        aria-controls={`panel-${slug}-bill`}
+        data-view="bill"
+        data-description="Chaque point représente un individu selon la longueur et la profondeur de son bec. Le cercle mis en évidence représente les dimensions moyennes du bec pour cette espèce."
+        class="view-tab
+               min-h-11 rounded-full
+               border px-5 py-3
+               text-sm font-bold
+               transition
+               focus-visible:outline-4
+               focus-visible:outline-offset-4
+               focus-visible:outline-white"
+      >
+        Morphologie du bec
+      </button>
+
+
+      <!-- MASSE -->
+
+      <button
+        id={`tab-${slug}-weight`}
+        type="button"
+        role="tab"
+        aria-selected="false"
+        aria-controls={`panel-${slug}-weight`}
+        tabindex="-1"
+        data-view="weight"
+        data-description="Distribution de la masse corporelle. La hauteur de chaque barre représente le nombre d'individus dans une tranche de poids."
+        class="view-tab
+               min-h-11 rounded-full
+               border px-5 py-3
+               text-sm font-bold
+               transition
+               focus-visible:outline-4
+               focus-visible:outline-offset-4
+               focus-visible:outline-white"
+      >
+        Masse corporelle
+      </button>
+
+
+      <!-- NAGEOIRES -->
+
+      <button
+        id={`tab-${slug}-flipper`}
+        type="button"
+        role="tab"
+        aria-selected="false"
+        aria-controls={`panel-${slug}-flipper`}
+        tabindex="-1"
+        data-view="flipper"
+        data-description="Distribution de la longueur des nageoires. Chaque barre regroupe les individus ayant des longueurs proches."
+        class="view-tab
+               min-h-11 rounded-full
+               border px-5 py-3
+               text-sm font-bold
+               transition
+               focus-visible:outline-4
+               focus-visible:outline-offset-4
+               focus-visible:outline-white"
+      >
+        Longueur des nageoires
+      </button>
+
+    </div>
+
+
+    <!-- DESCRIPTION DYNAMIQUE -->
+
+    <p
+      class="view-description
+             mt-5 max-w-3xl
+             border-l-4 pl-4
+             leading-7
+             text-[#e3d2d8]"
+      style={`border-color: ${speciesStyle.accent};`}
+      aria-live="polite"
+    >
+      Chaque point représente un individu selon la longueur
+      et la profondeur de son bec. Le cercle mis en évidence
+      représente les dimensions moyennes du bec pour cette
+      espèce.
+    </p>
+
+  </div>
+
+
+  <!-- ================================================== -->
+  <!-- 1. MORPHOLOGIE DU BEC                              -->
+  <!-- ================================================== -->
+
+  <div
+    id={`panel-${slug}-bill`}
+    role="tabpanel"
+    aria-labelledby={`tab-${slug}-bill`}
+    class="graphic-panel"
+    data-panel="bill"
+    tabindex="0"
+  >
+
+    <div
+      class="overflow-hidden
+             rounded-2xl
+             border border-[#5d3544]"
+    >
+
+      <PlotFigure
+        options={{
+          width: 900,
+          height: 500,
+
+          marginLeft: 70,
+          marginBottom: 60,
+          marginTop: 45,
+
+          style: plotStyle,
+
+          title:
+            `Morphologie du bec — ${species}`,
+
+          subtitle:
+            "Longueur et profondeur du bec de chaque individu",
+
+          caption:
+            `Le cercle entouré représente le bec moyen : ${formatNumber(averageBillLength)} × ${formatNumber(averageBillDepth)} mm.`,
+
+          ariaLabel:
+            `Nuage de points représentant la morphologie du bec des manchots ${species}.`,
+
+          ariaDescription:
+            `La position horizontale représente la longueur du bec en millimètres et la position verticale sa profondeur. Chaque petit point représente un individu. Un cercle plus grand et entouré représente les dimensions moyennes du bec.`,
+
+          x: {
+            label: "Longueur du bec (mm)",
+            grid: true,
+            nice: true
+          },
+
+          y: {
+            label: "Profondeur du bec (mm)",
+            grid: true,
+            nice: true
+          },
+
+          marks: [
+
+            Plot.frame({
+              stroke: "#6d4b58",
+              strokeOpacity: 0.7
+            }),
+
+
+            /*
+              INDIVIDUS
+            */
+
+            Plot.dot(
+              penguins,
+              {
+                filter: validBill,
+
+                x: "culmen_length_mm",
+                y: "culmen_depth_mm",
+
+                fill: speciesStyle.accent,
+
+                stroke: "#fff7fa",
+
+                strokeWidth: 0.8,
+
+                r: 4.5,
+
+                opacity: 0.72,
+
+                title: (d) =>
+                  `${d.species}
+Longueur du bec : ${d.culmen_length_mm} mm
+Profondeur du bec : ${d.culmen_depth_mm} mm
+Poids : ${d.body_mass_g ?? "Non renseigné"} g`
+              }
+            ),
+
+
+            /*
+              POINT MOYEN
+            */
+
+            Plot.dot(
+              [
+                {
+                  length: averageBillLength,
+                  depth: averageBillDepth
+                }
+              ],
+              {
+                x: "length",
+                y: "depth",
+
+                r: 10,
+
+                fill: "#2b1821",
+
+                stroke: speciesStyle.accent,
+
+                strokeWidth: 3,
+
+                title:
+                  `Moyenne de l'espèce ${species}
+Longueur : ${formatNumber(averageBillLength)} mm
+Profondeur : ${formatNumber(averageBillDepth)} mm`
+              }
+            )
+
+          ]
+        }}
+      />
+
+    </div>
+
+
+    <!-- LÉGENDE -->
+
+    <div
+      class="mt-4
+             flex flex-wrap gap-3
+             text-sm text-[#cdbbc2]"
+      aria-label="Légende du graphique"
+    >
+
+      <span
+        class="flex items-center gap-2
+               rounded-full
+               border border-[#5d3544]
+               bg-[#2b1821]
+               px-4 py-2"
+      >
+
+        <span
+          class="inline-block
+                 h-3 w-3
+                 rounded-full"
+          style={`background-color: ${speciesStyle.accent};`}
+          aria-hidden="true"
+        >
+        </span>
+
+        Individu
+
+      </span>
+
+
+      <span
+        class="flex items-center gap-2
+               rounded-full
+               border border-[#5d3544]
+               bg-[#2b1821]
+               px-4 py-2"
+      >
+
+        <span
+          class="inline-block
+                 h-4 w-4
+                 rounded-full
+                 border-[3px]"
+          style={`border-color: ${speciesStyle.accent};`}
+          aria-hidden="true"
+        >
+        </span>
+
+        Moyenne de l'espèce
+
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <!-- ================================================== -->
+  <!-- 2. MASSE CORPORELLE                                -->
+  <!-- ================================================== -->
+
+  <div
+    id={`panel-${slug}-weight`}
+    role="tabpanel"
+    aria-labelledby={`tab-${slug}-weight`}
+    class="graphic-panel"
+    data-panel="weight"
+    tabindex="0"
+    hidden
+  >
+
+    <div
+      class="overflow-hidden
+             rounded-2xl
+             border border-[#5d3544]"
+    >
+
+      <PlotFigure
+        options={{
+          width: 900,
+          height: 470,
+
+          marginLeft: 70,
+          marginBottom: 60,
+          marginTop: 45,
+
+          style: plotStyle,
+
+          title:
+            `Répartition de la masse — ${species}`,
+
+          subtitle:
+            "Nombre d'individus par tranche de poids",
+
+          caption:
+            `La ligne verticale indique le poids moyen : ${formatNumber(averageWeight)} g.`,
+
+          ariaLabel:
+            `Histogramme de la masse corporelle des manchots ${species}.`,
+
+          ariaDescription:
+            `L'axe horizontal représente la masse corporelle en grammes. L'axe vertical représente le nombre d'individus présents dans chaque tranche de poids.`,
+
+          x: {
+            label: "Masse corporelle (g)",
+            grid: false,
+            nice: true
+          },
+
+          y: {
+            label: "Nombre d'individus",
+            grid: true,
+            nice: true
+          },
+
+          marks: [
+
+            Plot.frame({
+              stroke: "#6d4b58",
+              strokeOpacity: 0.7
+            }),
+
+
+            Plot.rectY(
+              penguins.filter(validWeight),
+
+              {
+                ...Plot.binX(
+                  { y: "count" },
+                  {
+                    x: "body_mass_g",
+                    thresholds: 10
+                  }
+                ),
+                fill: speciesStyle.accent,
+                fillOpacity: 0.9,
+                stroke: "#21131b",
+                strokeWidth: 1,
+                inset: 1
+              }
+            ),
+
+
+            /*
+              NOMBRE D'INDIVIDUS
+              AU-DESSUS DES BARRES
+            */
+
+            Plot.text(
+              penguins.filter(validWeight),
+
+              {
+                ...Plot.binX(
+                  { y: "count", text: "count" },
+                  {
+                    x: "body_mass_g",
+                    thresholds: 10
+                  }
+                ),
+                dy: -8,
+                fill: "#fff7fa",
+                fontSize: 12,
+                fontWeight: 700
+              }
+            ),
+
+
+            /*
+              MOYENNE
+            */
+
+            Plot.ruleX(
+              [averageWeight],
+              {
+                stroke: speciesStyle.accent,
+
+                strokeWidth: 2.5,
+
+                strokeDasharray: "6,4"
+              }
+            ),
+
+
+            Plot.ruleY(
+              [0],
+              {
+                stroke: "#806270"
+              }
+            )
+
+          ]
+        }}
+      />
+
+    </div>
+
+
+    <div
+      class="mt-4
+             flex flex-wrap gap-3
+             text-sm text-[#cdbbc2]"
+    >
+
+      <span
+        class="rounded-full
+               border border-[#5d3544]
+               bg-[#2b1821]
+               px-4 py-2"
+      >
+        Hauteur = nombre d'individus
+      </span>
+
+
+      <span
+        class="rounded-full
+               border border-[#5d3544]
+               bg-[#2b1821]
+               px-4 py-2"
+      >
+        ┊ Moyenne :
+        {formatNumber(averageWeight)} g
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <!-- ================================================== -->
+  <!-- 3. LONGUEUR DES NAGEOIRES                          -->
+  <!-- ================================================== -->
+
+  <div
+    id={`panel-${slug}-flipper`}
+    role="tabpanel"
+    aria-labelledby={`tab-${slug}-flipper`}
+    class="graphic-panel"
+    data-panel="flipper"
+    tabindex="0"
+    hidden
+  >
+
+    <div
+      class="overflow-hidden
+             rounded-2xl
+             border border-[#5d3544]"
+    >
+
+      <PlotFigure
+        options={{
+          width: 900,
+          height: 470,
+
+          marginLeft: 70,
+          marginBottom: 60,
+          marginTop: 45,
+
+          style: plotStyle,
+
+          title:
+            `Longueur des nageoires — ${species}`,
+
+          subtitle:
+            "Distribution des longueurs observées",
+
+          caption:
+            `La ligne verticale indique la longueur moyenne : ${formatNumber(averageFlipper)} mm.`,
+
+          ariaLabel:
+            `Histogramme des longueurs de nageoires des manchots ${species}.`,
+
+          ariaDescription:
+            `L'axe horizontal représente la longueur des nageoires en millimètres. La hauteur des barres représente le nombre d'individus présents dans chaque intervalle.`,
+
+          x: {
+            label: "Longueur de nageoire (mm)",
+            grid: false,
+            nice: true
+          },
+
+          y: {
+            label: "Nombre d'individus",
+            grid: true,
+            nice: true
+          },
+
+          marks: [
+
+            Plot.frame({
+              stroke: "#6d4b58",
+              strokeOpacity: 0.7
+            }),
+
+
+            Plot.rectY(
+              penguins.filter(validFlipper),
+
+              {
+                ...Plot.binX(
+                  { y: "count" },
+                  {
+                    x: "flipper_length_mm",
+                    thresholds: 10
+                  }
+                ),
+                fill: speciesStyle.accent,
+                fillOpacity: 0.9,
+                stroke: "#21131b",
+                strokeWidth: 1,
+                inset: 1
+              }
+            ),
+
+
+            /*
+              NOMBRE D'INDIVIDUS
+              AU-DESSUS DES BARRES
+            */
+
+            Plot.text(
+              penguins.filter(validFlipper),
+
+              {
+                ...Plot.binX(
+                  { y: "count", text: "count" },
+                  {
+                    x: "flipper_length_mm",
+                    thresholds: 10
+                  }
+                ),
+                dy: -8,
+                fill: "#fff7fa",
+                fontSize: 12,
+                fontWeight: 700
+              }
+            ),
+
+
+            /*
+              MOYENNE
+            */
+
+            Plot.ruleX(
+              [averageFlipper],
+              {
+                stroke: speciesStyle.accent,
+
+                strokeWidth: 2.5,
+
+                strokeDasharray: "6,4"
+              }
+            ),
+
+
+            Plot.ruleY(
+              [0],
+              {
+                stroke: "#806270"
+              }
+            )
+
+          ]
+        }}
+      />
+
+    </div>
+
+
+    <div
+      class="mt-4
+             flex flex-wrap gap-3
+             text-sm text-[#cdbbc2]"
+    >
+
+      <span
+        class="rounded-full
+               border border-[#5d3544]
+               bg-[#2b1821]
+               px-4 py-2"
+      >
+        Hauteur = nombre d'individus
+      </span>
+
+
+      <span
+        class="rounded-full
+               border border-[#5d3544]
+               bg-[#2b1821]
+               px-4 py-2"
+      >
+        ┊ Moyenne :
+        {formatNumber(averageFlipper)} mm
+      </span>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<style>
+
+  .view-tab {
+    color: #e6d5dc;
+    border-color: #694653;
+    background: transparent;
+  }
+
+
+  .view-tab:hover {
+    background: var(--species-soft);
+  }
+
+
+  .view-tab[aria-selected="true"] {
+    color: #21131b;
+
+    background: var(--species-accent);
+
+    border-color: var(--species-accent);
+  }
+
+
+  .stat-card {
+    border-top:
+      3px solid
+      var(--species-accent);
+  }
+
+
+  @media (prefers-reduced-motion: reduce) {
+
+    .view-tab {
+      transition: none;
+    }
+
+  }
+
+</style>
+
+
+<script>
+
+  const initialiseGraphicTabs = () => {
+
+    const graphics =
+      document.querySelectorAll<HTMLElement>(
+        ".graphic-species"
+      );
+
+
+    graphics.forEach(
+      (graphic) => {
+
+        if (
+          graphic.dataset.tabsInitialised ===
+          "true"
+        ) {
+          return;
+        }
+
+
+        graphic.dataset.tabsInitialised =
+          "true";
+
+
+        const tabs =
+          Array.from(
+            graphic.querySelectorAll<HTMLButtonElement>(
+              '[role="tab"]'
+            )
+          );
+
+
+        const panels =
+          Array.from(
+            graphic.querySelectorAll<HTMLElement>(
+              '[role="tabpanel"]'
+            )
+          );
+
+
+        const description =
+          graphic.querySelector(
+            ".view-description"
+          );
+
+
+        const activateTab = (
+          selectedTab: HTMLButtonElement,
+          moveFocus = false
+        ) => {
+
+          const view =
+            selectedTab.dataset.view;
+
+
+          tabs.forEach(
+            (tab) => {
+
+              const active =
+                tab === selectedTab;
+
+
+              tab.setAttribute(
+                "aria-selected",
+                active
+                  ? "true"
+                  : "false"
+              );
+
+
+              tab.tabIndex =
+                active
+                  ? 0
+                  : -1;
+
+            }
+          );
+
+
+          panels.forEach(
+            (panel) => {
+
+              panel.hidden =
+                panel.dataset.panel !==
+                view;
+
+            }
+          );
+
+
+          if (
+            description &&
+            selectedTab.dataset.description
+          ) {
+
+            description.textContent =
+              selectedTab.dataset.description;
+
+          }
+
+
+          if (moveFocus) {
+            selectedTab.focus();
+          }
+
+        };
+
+
+        tabs.forEach(
+          (tab, index) => {
+
+            tab.addEventListener(
+              "click",
+              () => {
+
+                activateTab(tab);
+
+              }
+            );
+
+
+            tab.addEventListener(
+              "keydown",
+              (event) => {
+
+                let nextIndex =
+                  index;
+
+
+                if (
+                  event.key ===
+                  "ArrowRight"
+                ) {
+
+                  nextIndex =
+                    (
+                      index + 1
+                    ) %
+                    tabs.length;
+
+                }
+
+
+                else if (
+                  event.key ===
+                  "ArrowLeft"
+                ) {
+
+                  nextIndex =
+                    (
+                      index -
+                      1 +
+                      tabs.length
+                    ) %
+                    tabs.length;
+
+                }
+
+
+                else if (
+                  event.key ===
+                  "Home"
+                ) {
+
+                  nextIndex = 0;
+
+                }
+
+
+                else if (
+                  event.key ===
+                  "End"
+                ) {
+
+                  nextIndex =
+                    tabs.length - 1;
+
+                }
+
+
+                else {
+
+                  return;
+
+                }
+
+
+                event.preventDefault();
+
+
+                activateTab(
+                  tabs[nextIndex],
+                  true
+                );
+
+              }
+            );
+
+          }
+        );
+
+      }
+    );
+
+  };
+
+
+  initialiseGraphicTabs();
+
+
+  document.addEventListener(
+    "astro:page-load",
+    initialiseGraphicTabs
+  );
+
+</script>

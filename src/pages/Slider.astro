@@ -1,0 +1,1207 @@
+---
+import Layout from "../layouts/Layout.astro";
+
+import GraphicCars from "../components/GraphicCars.astro";
+import GraphicPizza from "../components/GraphicPizza.astro";
+import GraphicSpecies from "../components/GraphicSpecies.astro";
+
+
+const datasets = [
+  {
+    id: "cars",
+    label: "Cars",
+    color: "#72a7cf"
+  },
+
+  {
+    id: "pizza",
+    label: "Pizza",
+    color: "#e2875d"
+  },
+
+  {
+    id: "penguins",
+    label: "Penguins",
+    color: "#e890b0"
+  }
+] as const;
+
+
+const carsViews = [
+  {
+    id: "cars-3",
+    label: "3 cylindres",
+    cylinders: 3,
+    color: "#d890b5"
+  },
+
+  {
+    id: "cars-4",
+    label: "4 cylindres",
+    cylinders: 4,
+    color: "#72a7cf"
+  },
+
+  {
+    id: "cars-5",
+    label: "5 cylindres",
+    cylinders: 5,
+    color: "#9d8bd8"
+  },
+
+  {
+    id: "cars-6",
+    label: "6 cylindres",
+    cylinders: 6,
+    color: "#d8ae61"
+  },
+
+  {
+    id: "cars-8",
+    label: "8 cylindres",
+    cylinders: 8,
+    color: "#d36c67"
+  }
+] as const;
+
+
+const pizzaViews = [
+  {
+    id: "pizza-classic",
+    label: "Classic",
+    category: "Classic",
+    color: "#e2875d"
+  },
+
+  {
+    id: "pizza-specialty",
+    label: "Specialty",
+    category: "Specialty",
+    color: "#d985a7"
+  },
+
+  {
+    id: "pizza-vegetarian",
+    label: "Vegetarian",
+    category: "Vegetarian",
+    color: "#7dbb86"
+  }
+] as const;
+
+
+const penguinViews = [
+  {
+    id: "penguins-adelie",
+    label: "Adelie",
+    species: "Adelie",
+    color: "#e890b0"
+  },
+
+  {
+    id: "penguins-gentoo",
+    label: "Gentoo",
+    species: "Gentoo",
+    color: "#7eb8e8"
+  },
+
+  {
+    id: "penguins-chinstrap",
+    label: "Chinstrap",
+    species: "Chinstrap",
+    color: "#e8c56a"
+  }
+] as const;
+---
+
+<Layout title="Slider général — Data Explorer">
+
+  <main
+    class="mx-auto max-w-7xl
+           px-6 py-16
+           lg:px-10"
+  >
+
+    <!-- ================================================== -->
+    <!-- RETOUR                                             -->
+    <!-- ================================================== -->
+
+    <a
+      href="/"
+      class="text-sm font-medium
+             text-[#c2aeb3]
+             transition
+             hover:text-[#f4e9e3]
+             focus-visible:outline
+             focus-visible:outline-4
+             focus-visible:outline-offset-4
+             focus-visible:outline-[#d06a80]"
+    >
+      ← Retour à l'accueil
+    </a>
+
+
+    <!-- ================================================== -->
+    <!-- HERO                                               -->
+    <!-- ================================================== -->
+
+    <section class="py-16">
+
+      <p
+        class="text-sm font-bold
+               uppercase tracking-[0.2em]
+               text-[#b34d68]"
+      >
+        Vue slider · TP2
+      </p>
+
+
+      <h1
+        class="mt-4 max-w-5xl
+               text-5xl font-bold
+               leading-[0.95]
+               text-[#f4e9e3]
+               md:text-7xl"
+      >
+        Toutes les données,
+
+        <span
+          class="block text-[#b34d68]"
+        >
+          dans une seule page.
+        </span>
+      </h1>
+
+
+      <p
+        class="mt-6 max-w-2xl
+               text-lg leading-8
+               text-[#c2aeb3]"
+      >
+        Chaque jeu de données dispose de son propre
+        slider horizontal afin de comparer rapidement
+        ses différentes catégories ou configurations.
+      </p>
+
+    </section>
+
+
+    <!-- ================================================== -->
+    <!-- NAVIGATION GÉNÉRALE                                -->
+    <!-- ================================================== -->
+
+    <nav
+      class="dataset-nav
+             sticky top-4 z-30
+             mb-20
+             flex w-fit
+             flex-wrap gap-2
+             rounded-full
+             border border-[#4b2936]
+             bg-[#21131b]/95
+             p-2
+             shadow-lg
+             backdrop-blur"
+      aria-label="Navigation entre les jeux de données"
+    >
+
+      {
+        datasets.map(
+          (dataset, index) => (
+
+            <a
+              href={`#${dataset.id}`}
+              class:list={[
+                "dataset-menu-item rounded-full px-5 py-2.5 text-sm font-semibold transition",
+                "focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2",
+                index === 0 && "active"
+              ]}
+              style={`--dataset-accent: ${dataset.color};`}
+            >
+              {dataset.label}
+            </a>
+
+          )
+        )
+      }
+
+    </nav>
+
+
+    <!-- ================================================== -->
+    <!-- CARS                                               -->
+    <!-- ================================================== -->
+
+    <section
+      id="cars"
+      class="dataset-section
+             scroll-mt-32
+             border-b border-[#35202a]
+             pb-28"
+      aria-labelledby="cars-title"
+      data-dataset="cars"
+    >
+
+      <!-- TITRE -->
+
+      <div class="mb-10">
+
+        <p
+          class="mb-3 text-sm font-bold
+                 uppercase tracking-[0.2em]
+                 text-[#72a7cf]"
+        >
+          Slider 01
+        </p>
+
+
+        <h2
+          id="cars-title"
+          class="text-4xl font-bold
+                 tracking-tight
+                 text-[#f4e9e3]
+                 md:text-6xl"
+        >
+          Cars
+        </h2>
+
+
+        <p
+          class="mt-5 max-w-2xl
+                 leading-7
+                 text-[#b8cbd8]"
+        >
+          Comparer les véhicules selon leur nombre
+          de cylindres sans changer de page.
+        </p>
+
+      </div>
+
+
+      <!-- MENU CARS -->
+
+      <nav
+        class="slider-menu
+               mb-8
+               flex flex-wrap gap-2"
+        aria-label="Choisir une configuration moteur"
+        data-slider-menu="cars-slider"
+      >
+
+        {
+          carsViews.map(
+            (view, index) => (
+
+              <a
+                href={`#${view.id}`}
+                class:list={[
+                  "menu-item rounded-full border px-5 py-2.5 text-sm font-semibold transition",
+                  "focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2",
+                  index === 0 && "active"
+                ]}
+                style={`--accent: ${view.color};`}
+                aria-current={
+                  index === 0
+                    ? "true"
+                    : undefined
+                }
+              >
+                {view.label}
+              </a>
+
+            )
+          )
+        }
+
+      </nav>
+
+
+      <!-- SLIDER CARS -->
+
+      <div
+        id="cars-slider"
+        class="data-slider
+               flex w-full
+               snap-x snap-mandatory
+               overflow-x-auto
+               scroll-smooth
+               rounded-3xl"
+        tabindex="0"
+        aria-label="Comparaison des véhicules selon le nombre de cylindres"
+      >
+
+        {
+          carsViews.map(
+            (view) => (
+
+              <section
+                id={view.id}
+                class="item
+                       min-w-full
+                       snap-start
+                       px-1"
+                aria-label={view.label}
+              >
+
+                <div
+                  class="mb-6
+                         rounded-2xl
+                         border-l-4
+                         bg-[#18232c]
+                         p-5"
+                  style={`border-color: ${view.color};`}
+                >
+
+                  <p
+                    class="text-sm font-bold
+                           uppercase
+                           tracking-[0.15em]
+                           text-[#9fc3dd]"
+                  >
+                    Configuration moteur
+                  </p>
+
+
+                  <h3
+                    class="mt-2
+                           text-3xl font-bold
+                           text-[#f5f9fc]"
+                  >
+                    {view.label}
+                  </h3>
+
+                </div>
+
+
+                <GraphicCars
+                  cylinders={view.cylinders}
+                />
+
+              </section>
+
+            )
+          )
+        }
+
+      </div>
+
+
+      <p
+        class="mt-5 text-center
+               text-sm text-[#9fb4c1]"
+      >
+        Faites défiler horizontalement ou utilisez
+        les boutons pour changer de configuration.
+      </p>
+
+    </section>
+
+
+    <!-- ================================================== -->
+    <!-- PIZZA                                              -->
+    <!-- ================================================== -->
+
+    <section
+      id="pizza"
+      class="dataset-section
+             scroll-mt-32
+             border-b border-[#35202a]
+             py-28"
+      aria-labelledby="pizza-title"
+      data-dataset="pizza"
+    >
+
+      <!-- TITRE -->
+
+      <div class="mb-10">
+
+        <p
+          class="mb-3 text-sm font-bold
+                 uppercase tracking-[0.2em]
+                 text-[#e2875d]"
+        >
+          Slider 02
+        </p>
+
+
+        <h2
+          id="pizza-title"
+          class="text-4xl font-bold
+                 tracking-tight
+                 text-[#f4e9e3]
+                 md:text-6xl"
+        >
+          Pizza
+        </h2>
+
+
+        <p
+          class="mt-5 max-w-2xl
+                 leading-7
+                 text-[#d5bcb2]"
+        >
+          Comparer Classic, Specialty et Vegetarian
+          dans une même interface.
+        </p>
+
+      </div>
+
+
+      <!-- MENU PIZZA -->
+
+      <nav
+        class="slider-menu
+               mb-8
+               flex flex-wrap gap-2"
+        aria-label="Choisir une catégorie de pizzas"
+        data-slider-menu="pizza-slider"
+      >
+
+        {
+          pizzaViews.map(
+            (view, index) => (
+
+              <a
+                href={`#${view.id}`}
+                class:list={[
+                  "menu-item rounded-full border px-5 py-2.5 text-sm font-semibold transition",
+                  "focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2",
+                  index === 0 && "active"
+                ]}
+                style={`--accent: ${view.color};`}
+                aria-current={
+                  index === 0
+                    ? "true"
+                    : undefined
+                }
+              >
+                {view.label}
+              </a>
+
+            )
+          )
+        }
+
+      </nav>
+
+
+      <!-- SLIDER PIZZA -->
+
+      <div
+        id="pizza-slider"
+        class="data-slider
+               flex w-full
+               snap-x snap-mandatory
+               overflow-x-auto
+               scroll-smooth
+               rounded-3xl"
+        tabindex="0"
+        aria-label="Comparaison des catégories de pizzas"
+      >
+
+        {
+          pizzaViews.map(
+            (view) => (
+
+              <section
+                id={view.id}
+                class="item
+                       min-w-full
+                       snap-start
+                       px-1"
+                aria-label={view.label}
+              >
+
+                <div
+                  class="mb-6
+                         rounded-2xl
+                         border-l-4
+                         bg-[#291b18]
+                         p-5"
+                  style={`border-color: ${view.color};`}
+                >
+
+                  <p
+                    class="text-sm font-bold
+                           uppercase
+                           tracking-[0.15em]
+                           text-[#e8ad91]"
+                  >
+                    Catégorie
+                  </p>
+
+
+                  <h3
+                    class="mt-2
+                           text-3xl font-bold
+                           text-[#fff7f2]"
+                  >
+                    {view.label}
+                  </h3>
+
+                </div>
+
+
+                <GraphicPizza
+                  category={view.category}
+                />
+
+              </section>
+
+            )
+          )
+        }
+
+      </div>
+
+
+      <p
+        class="mt-5 text-center
+               text-sm text-[#c5aaa0]"
+      >
+        Faites défiler horizontalement ou utilisez
+        les boutons pour changer de catégorie.
+      </p>
+
+    </section>
+
+
+    <!-- ================================================== -->
+    <!-- PENGUINS                                           -->
+    <!-- ================================================== -->
+
+    <section
+      id="penguins"
+      class="dataset-section
+             scroll-mt-32
+             pt-28 pb-20"
+      aria-labelledby="penguins-title"
+      data-dataset="penguins"
+    >
+
+      <!-- TITRE -->
+
+      <div class="mb-10">
+
+        <p
+          class="mb-3 text-sm font-bold
+                 uppercase tracking-[0.2em]
+                 text-[#e890b0]"
+        >
+          Slider 03
+        </p>
+
+
+        <h2
+          id="penguins-title"
+          class="text-4xl font-bold
+                 tracking-tight
+                 text-[#f4e9e3]
+                 md:text-6xl"
+        >
+          Penguins
+        </h2>
+
+
+        <p
+          class="mt-5 max-w-2xl
+                 leading-7
+                 text-[#cdbbc2]"
+        >
+          Comparer Adelie, Gentoo et Chinstrap
+          grâce au même fonctionnement de slider.
+        </p>
+
+      </div>
+
+
+      <!-- MENU PENGUINS -->
+
+      <nav
+        class="slider-menu
+               mb-8
+               flex flex-wrap gap-2"
+        aria-label="Choisir une espèce de manchot"
+        data-slider-menu="penguins-slider"
+      >
+
+        {
+          penguinViews.map(
+            (view, index) => (
+
+              <a
+                href={`#${view.id}`}
+                class:list={[
+                  "menu-item rounded-full border px-5 py-2.5 text-sm font-semibold transition",
+                  "focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2",
+                  index === 0 && "active"
+                ]}
+                style={`--accent: ${view.color};`}
+                aria-current={
+                  index === 0
+                    ? "true"
+                    : undefined
+                }
+              >
+                {view.label}
+              </a>
+
+            )
+          )
+        }
+
+      </nav>
+
+
+      <!-- SLIDER PENGUINS -->
+
+      <div
+        id="penguins-slider"
+        class="data-slider
+               flex w-full
+               snap-x snap-mandatory
+               overflow-x-auto
+               scroll-smooth
+               rounded-3xl"
+        tabindex="0"
+        aria-label="Comparaison des espèces de manchots"
+      >
+
+        {
+          penguinViews.map(
+            (view) => (
+
+              <section
+                id={view.id}
+                class="item
+                       min-w-full
+                       snap-start
+                       px-1"
+                aria-label={view.label}
+              >
+
+                <div
+                  class="mb-6
+                         rounded-2xl
+                         border-l-4
+                         bg-[#21131b]
+                         p-5"
+                  style={`border-color: ${view.color};`}
+                >
+
+                  <p
+                    class="text-sm font-bold
+                           uppercase
+                           tracking-[0.15em]
+                           text-[#d4a5b5]"
+                  >
+                    Espèce
+                  </p>
+
+
+                  <h3
+                    class="mt-2
+                           text-3xl font-bold
+                           text-[#fff7fa]"
+                  >
+                    {view.label}
+                  </h3>
+
+                </div>
+
+
+                <GraphicSpecies
+                  species={view.species}
+                />
+
+              </section>
+
+            )
+          )
+        }
+
+      </div>
+
+
+      <p
+        class="mt-5 text-center
+               text-sm text-[#a98b96]"
+      >
+        Faites défiler horizontalement ou utilisez
+        les boutons pour changer d'espèce.
+      </p>
+
+    </section>
+
+  </main>
+
+
+  <!-- ================================================== -->
+  <!-- STYLE                                              -->
+  <!-- ================================================== -->
+
+  <style>
+
+    /*
+      MENU DES DATASETS
+    */
+
+    .dataset-menu-item {
+      color: #d8bfc5;
+    }
+
+
+    .dataset-menu-item:hover {
+      background: #3a202c;
+    }
+
+
+    .dataset-menu-item.active {
+      color: #120b10;
+      background: var(--dataset-accent);
+    }
+
+
+    /*
+      MENUS DES SLIDERS
+    */
+
+    .menu-item {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+
+    .menu-item:hover {
+      background:
+        color-mix(
+          in srgb,
+          var(--accent) 15%,
+          transparent
+        );
+    }
+
+
+    .menu-item.active {
+      color: #120b10;
+      background: var(--accent);
+    }
+
+
+    /*
+      SCROLLBAR
+    */
+
+    .data-slider {
+      scrollbar-width: thin;
+      scrollbar-color:
+        #60404d
+        #21131b;
+    }
+
+
+    /*
+      RÉDUCTION DES ANIMATIONS
+    */
+
+    @media (
+      prefers-reduced-motion: reduce
+    ) {
+
+      .data-slider {
+        scroll-behavior: auto;
+      }
+
+
+      .menu-item,
+      .dataset-menu-item {
+        transition: none;
+      }
+
+    }
+
+  </style>
+
+
+  <!-- ================================================== -->
+  <!-- SCRIPT                                             -->
+  <!-- ================================================== -->
+
+  <script>
+
+    const prefersReducedMotion = () =>
+      window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
+
+
+    /* ================================================ */
+    /* SLIDERS INTERNES                                */
+    /* ================================================ */
+
+    const initialiseSliders = () => {
+
+      const sliders =
+        document.querySelectorAll(
+          ".data-slider"
+        );
+
+
+      sliders.forEach(
+        (slider) => {
+
+          if (
+            slider.dataset.initialised ===
+            "true"
+          ) {
+            return;
+          }
+
+
+          slider.dataset.initialised =
+            "true";
+
+
+          const sliderId =
+            slider.getAttribute("id");
+
+
+          if (!sliderId) {
+            return;
+          }
+
+
+          const menu =
+            document.querySelector(
+              `[data-slider-menu="${sliderId}"]`
+            );
+
+
+          if (!menu) {
+            return;
+          }
+
+
+          const menuItems =
+            Array.from(
+              menu.querySelectorAll(
+                ".menu-item"
+              )
+            );
+
+
+          const items =
+            Array.from(
+              slider.querySelectorAll(
+                ".item"
+              )
+            );
+
+
+          /*
+            CLIC SUR LE MENU
+          */
+
+          menuItems.forEach(
+            (menuItem) => {
+
+              menuItem.addEventListener(
+                "click",
+                (event) => {
+
+                  event.preventDefault();
+
+
+                  const href =
+                    menuItem.getAttribute(
+                      "href"
+                    );
+
+
+                  if (!href) {
+                    return;
+                  }
+
+
+                  const target =
+                    slider.querySelector(
+                      href
+                    );
+
+
+                  if (!target) {
+                    return;
+                  }
+
+
+                  slider.scrollTo({
+
+                    left:
+                      target.offsetLeft -
+                      slider.offsetLeft,
+
+                    behavior:
+                      prefersReducedMotion()
+                        ? "auto"
+                        : "smooth"
+
+                  });
+
+                }
+              );
+
+            }
+          );
+
+
+          /*
+            INTERSECTION OBSERVER
+          */
+
+          const observer =
+            new IntersectionObserver(
+
+              (entries) => {
+
+                entries.forEach(
+                  (entry) => {
+
+                    if (
+                      !entry.isIntersecting
+                    ) {
+                      return;
+                    }
+
+
+                    const id =
+                      entry.target.getAttribute(
+                        "id"
+                      );
+
+
+                    menuItems.forEach(
+                      (menuItem) => {
+
+                        const active =
+                          menuItem.getAttribute(
+                            "href"
+                          ) ===
+                          `#${id}`;
+
+
+                        menuItem.classList.toggle(
+                          "active",
+                          active
+                        );
+
+
+                        if (active) {
+
+                          menuItem.setAttribute(
+                            "aria-current",
+                            "true"
+                          );
+
+                        }
+
+                        else {
+
+                          menuItem.removeAttribute(
+                            "aria-current"
+                          );
+
+                        }
+
+                      }
+                    );
+
+                  }
+                );
+
+              },
+
+              {
+                root: slider,
+                threshold: 0.55
+              }
+
+            );
+
+
+          items.forEach(
+            (item) => {
+
+              observer.observe(item);
+
+            }
+          );
+
+        }
+      );
+
+    };
+
+
+    /* ================================================ */
+    /* MENU DATASETS                                   */
+    /* ================================================ */
+
+    const initialiseDatasetNavigation =
+      () => {
+
+        const sections =
+          document.querySelectorAll(
+            ".dataset-section"
+          );
+
+
+        const menuItems =
+          document.querySelectorAll(
+            ".dataset-menu-item"
+          );
+
+
+        if (
+          sections.length === 0 ||
+          menuItems.length === 0
+        ) {
+          return;
+        }
+
+
+        menuItems.forEach(
+          (menuItem) => {
+
+            menuItem.addEventListener(
+              "click",
+              (event) => {
+
+                event.preventDefault();
+
+
+                const href =
+                  menuItem.getAttribute(
+                    "href"
+                  );
+
+
+                if (!href) {
+                  return;
+                }
+
+
+                const target =
+                  document.querySelector(
+                    href
+                  );
+
+
+                target?.scrollIntoView({
+
+                  behavior:
+                    prefersReducedMotion()
+                      ? "auto"
+                      : "smooth",
+
+                  block: "start"
+
+                });
+
+              }
+            );
+
+          }
+        );
+
+
+        const observer =
+          new IntersectionObserver(
+
+            (entries) => {
+
+              entries.forEach(
+                (entry) => {
+
+                  if (
+                    !entry.isIntersecting
+                  ) {
+                    return;
+                  }
+
+
+                  const id =
+                    entry.target.getAttribute(
+                      "id"
+                    );
+
+
+                  menuItems.forEach(
+                    (menuItem) => {
+
+                      const active =
+                        menuItem.getAttribute(
+                          "href"
+                        ) ===
+                        `#${id}`;
+
+
+                      menuItem.classList.toggle(
+                        "active",
+                        active
+                      );
+
+                    }
+                  );
+
+                }
+              );
+
+            },
+
+            {
+              root: null,
+
+              rootMargin:
+                "-25% 0px -55% 0px",
+
+              threshold: 0
+            }
+
+          );
+
+
+        sections.forEach(
+          (section) => {
+
+            observer.observe(section);
+
+          }
+        );
+
+      };
+
+
+    /* ================================================ */
+    /* INITIALISATION                                  */
+    /* ================================================ */
+
+    const initialiseSliderPage =
+      () => {
+
+        initialiseSliders();
+
+        initialiseDatasetNavigation();
+
+      };
+
+
+    initialiseSliderPage();
+
+
+    document.addEventListener(
+      "astro:page-load",
+      initialiseSliderPage
+    );
+
+  </script>
+
+</Layout>

@@ -1,0 +1,35 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import PizzaMenu from "../../components/PizzaMenu.astro";
+import GraphicPizza from "../../components/GraphicPizza.astro";
+---
+
+<Layout title="Pizza — Classic">
+
+  <main class="mx-auto max-w-7xl px-6 py-16 lg:px-10">
+
+    <a href="/" class="text-sm text-[#e8ad91]">
+      ← Retour à l'accueil
+    </a>
+
+    <section class="py-16">
+
+      <p class="text-sm font-bold uppercase tracking-[0.2em] text-[#e2875d]">
+        Bonus TP2 · Pizza
+      </p>
+
+      <h1 class="mt-4 text-6xl font-bold text-[#fff7f2]">
+        Classic
+      </h1>
+
+      <PizzaMenu current="Classic" />
+
+    </section>
+
+    <section class="pb-20">
+      <GraphicPizza category="Classic" />
+    </section>
+
+  </main>
+
+</Layout>

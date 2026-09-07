@@ -1,0 +1,88 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import GraphicPizza from "../../components/GraphicPizza.astro";
+---
+
+<Layout title="Pizza — Exploration interactive">
+
+  <main
+    class="mx-auto
+           max-w-7xl
+           px-6 py-16
+           lg:px-10"
+  >
+
+    <a
+      href="/"
+      class="text-sm
+             font-medium
+             text-[#b99d92]
+             transition
+             hover:text-[#e2875d]
+             focus-visible:ring-2"
+    >
+      ← Toutes les explorations
+    </a>
+
+
+    <!-- INTRO -->
+
+    <section class="py-20">
+
+      <p
+        class="mb-4
+               text-sm
+               font-bold
+               uppercase
+               tracking-[0.2em]
+               text-[#e2875d]"
+      >
+        Exploration enrichie · Pizza
+      </p>
+
+
+      <h1
+        class="max-w-5xl
+               text-6xl
+               font-bold
+               leading-[0.95]
+               tracking-tight
+               text-[#f4e9e3]
+               md:text-8xl"
+      >
+        Comprendre les
+        <span
+          class="block
+                 text-[#e2875d]"
+        >
+          habitudes de commande.
+        </span>
+      </h1>
+
+
+      <p
+        class="mt-7
+               max-w-2xl
+               text-lg
+               leading-8
+               text-[#c2aeb3]"
+      >
+        Une exploration interactive des ventes :
+        chiffre d'affaires, rythme de commande
+        et pizzas les plus populaires.
+      </p>
+
+    </section>
+
+
+    <!-- EXPLORATION -->
+
+    <section class="pb-20">
+
+      <GraphicPizza />
+
+    </section>
+
+  </main>
+
+</Layout>
