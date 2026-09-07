@@ -2,23 +2,27 @@
 import Layout from "../layouts/Layout.astro";
 ---
 
-<Layout title="Data Explorer">
+<Layout title="Data Explorer — TP2">
 
   <main class="mx-auto max-w-7xl px-6 py-16 lg:px-10">
 
-    <section class="flex min-h-[65vh] flex-col justify-center">
+    <!-- HERO -->
+
+    <section
+      class="flex min-h-[65vh] flex-col justify-center"
+    >
 
       <p
-        class="mb-5 text-sm font-bold uppercase tracking-[0.2em]
-               text-emerald-700"
+        class="mb-5 text-sm font-bold uppercase
+               tracking-[0.2em] text-emerald-700"
       >
         Astro × Observable Plot
       </p>
 
       <h1
-        class="max-w-5xl text-6xl font-bold leading-[0.95]
-               tracking-tight text-slate-900
-               md:text-8xl"
+        class="max-w-5xl text-6xl font-bold
+               leading-[0.95] tracking-tight
+               text-slate-900 md:text-8xl"
       >
         Explorer les données
         <span class="block text-emerald-700">
@@ -27,73 +31,81 @@ import Layout from "../layouts/Layout.astro";
       </h1>
 
       <p
-        class="mt-8 max-w-2xl text-lg leading-8 text-slate-600"
+        class="mt-8 max-w-2xl text-lg
+               leading-8 text-slate-600"
       >
-        Trois jeux de données, plusieurs visualisations et différentes
-        manières de raconter ce que les données révèlent avec Observable Plot.
+        Le TP2 reprend les visualisations du premier TP
+        et teste deux méthodes différentes de navigation
+        entre plusieurs graphiques.
       </p>
 
       <a
-        href="#datasets"
-        class="mt-8 w-fit rounded-full bg-slate-900 px-6 py-3
-               font-medium text-white transition
-               hover:-translate-y-1 hover:bg-emerald-700
-               focus-visible:outline-4
-               focus-visible:outline-offset-4 focus-visible:outline-emerald-600"
+        href="#tp2"
+        class="mt-8 w-fit rounded-full
+               bg-slate-900 px-6 py-3
+               font-medium text-white
+               transition
+               hover:-translate-y-1
+               hover:bg-emerald-700"
       >
-        Découvrir les datasets ↓
+        Découvrir le TP2 ↓
       </a>
 
     </section>
 
 
+    <!-- TP2 -->
+
     <section
-      id="datasets"
+      id="tp2"
       class="py-24"
-      aria-labelledby="datasets-title"
+      aria-labelledby="tp2-title"
     >
 
-      <div class="mb-12">
+      <p
+        class="mb-3 text-sm font-bold uppercase
+               tracking-[0.2em] text-emerald-700"
+      >
+        TP2
+      </p>
 
-        <p
-          class="mb-3 text-sm font-bold uppercase tracking-[0.2em]
-                 text-emerald-700"
-        >
-          Explorations
-        </p>
-
-        <h2
-          id="datasets-title"
-          class="text-4xl font-bold tracking-tight text-slate-900
-                 md:text-6xl"
-        >
-          Choisir un sujet
-        </h2>
-
-      </div>
+      <h2
+        id="tp2-title"
+        class="max-w-4xl text-4xl font-bold
+               tracking-tight text-slate-900
+               md:text-6xl"
+      >
+        Deux façons de naviguer entre les graphiques
+      </h2>
 
 
-      <div class="grid gap-6 md:grid-cols-3">
+      <div class="mt-12 grid gap-6 md:grid-cols-2">
 
-        <!-- PENGUINS -->
+        <!-- PLUSIEURS PAGES -->
 
         <a
-          href="/penguins"
-          class="group flex min-h-105 flex-col justify-between
-                 rounded-3xl border border-slate-200 bg-white p-8
-                 transition duration-300
-                 hover:-translate-y-2 hover:bg-slate-900
-                 hover:text-white hover:shadow-xl"
+          href="/Especes/Adelie"
+          class="group flex min-h-[430px]
+                 flex-col justify-between
+                 rounded-3xl border border-slate-200
+                 bg-white p-8 transition duration-300
+                 hover:-translate-y-2
+                 hover:bg-slate-900
+                 hover:text-white
+                 hover:shadow-xl"
         >
 
-          <div class="flex items-center justify-between">
+          <div class="flex justify-between">
 
-            <span class="font-bold text-emerald-700">
+            <span
+              class="font-bold text-emerald-700"
+            >
               01
             </span>
 
             <span
-              class="text-2xl transition group-hover:-translate-y-1
+              class="text-2xl transition
+                     group-hover:-translate-y-1
                      group-hover:translate-x-1"
               aria-hidden="true"
             >
@@ -102,50 +114,72 @@ import Layout from "../layouts/Layout.astro";
 
           </div>
 
+
           <div>
 
-            <h3 class="text-4xl font-bold tracking-tight">
-              Penguins
+            <p
+              class="mb-3 text-sm font-bold
+                     uppercase tracking-[0.15em]
+                     text-emerald-700"
+            >
+              Une page par graphique
+            </p>
+
+            <h3
+              class="text-4xl font-bold
+                     tracking-tight md:text-5xl"
+            >
+              Trois espèces,
+              trois pages.
             </h3>
 
             <p
-              class="mt-5 leading-7 text-slate-600
+              class="mt-5 max-w-md leading-7
+                     text-slate-600
                      group-hover:text-slate-300"
             >
-              Morphologie, répartition et masse corporelle
-              de plusieurs espèces de manchots.
+              Adelie, Gentoo et Chinstrap disposent
+              chacune de leur propre route Astro.
             </p>
 
           </div>
 
+
           <span
-            class="text-sm text-slate-500 group-hover:text-slate-400"
+            class="text-sm text-slate-500
+                   group-hover:text-slate-400"
           >
-            3 visualisations
+            Pages multiples · menu de navigation
           </span>
 
         </a>
 
 
-        <!-- CARS -->
+        <!-- SLIDER -->
 
         <a
-          href="/cars"
-          class="group flex min-h-105 flex-col justify-between
-                 rounded-3xl border border-slate-200 bg-white p-8
-                 transition duration-300
-                 hover:-translate-y-2 hover:bg-slate-900
-                 hover:text-white hover:shadow-xl"
+          href="/Especes/Slider"
+          class="group flex min-h-[430px]
+                 flex-col justify-between
+                 rounded-3xl border border-slate-200
+                 bg-white p-8 transition duration-300
+                 hover:-translate-y-2
+                 hover:bg-slate-900
+                 hover:text-white
+                 hover:shadow-xl"
         >
 
-          <div class="flex items-center justify-between">
+          <div class="flex justify-between">
 
-            <span class="font-bold text-emerald-700">
+            <span
+              class="font-bold text-emerald-700"
+            >
               02
             </span>
 
             <span
-              class="text-2xl transition group-hover:-translate-y-1
+              class="text-2xl transition
+                     group-hover:-translate-y-1
                      group-hover:translate-x-1"
               aria-hidden="true"
             >
@@ -154,80 +188,159 @@ import Layout from "../layouts/Layout.astro";
 
           </div>
 
+
           <div>
 
-            <h3 class="text-4xl font-bold tracking-tight">
-              Cars
+            <p
+              class="mb-3 text-sm font-bold
+                     uppercase tracking-[0.15em]
+                     text-emerald-700"
+            >
+              Une seule page
+            </p>
+
+            <h3
+              class="text-4xl font-bold
+                     tracking-tight md:text-5xl"
+            >
+              Ancres & slider.
             </h3>
 
             <p
-              class="mt-5 leading-7 text-slate-600
+              class="mt-5 max-w-md leading-7
+                     text-slate-600
                      group-hover:text-slate-300"
             >
-              Consommation, puissance, cylindres et poids
-              de différents modèles automobiles.
+              Les trois graphiques sont regroupés dans
+              un slider horizontal avec un menu dynamique.
             </p>
 
           </div>
 
+
           <span
-            class="text-sm text-slate-500 group-hover:text-slate-400"
+            class="text-sm text-slate-500
+                   group-hover:text-slate-400"
           >
-            3 visualisations
+            Ancres · CSS Scroll Snap · IntersectionObserver
           </span>
 
         </a>
 
+      </div>
 
-        <!-- PIZZA -->
+    </section>
+
+
+    <!-- RAPPEL TP1 -->
+
+    <section
+      class="py-24"
+      aria-labelledby="tp1-title"
+    >
+
+      <p
+        class="mb-3 text-sm font-bold uppercase
+               tracking-[0.2em] text-emerald-700"
+      >
+        TP1
+      </p>
+
+      <h2
+        id="tp1-title"
+        class="text-4xl font-bold
+               tracking-tight text-slate-900
+               md:text-6xl"
+      >
+        Explorations précédentes
+      </h2>
+
+
+      <div
+        class="mt-12 grid gap-6 md:grid-cols-3"
+      >
+
+        <a
+          href="/penguins"
+          class="rounded-3xl border border-slate-200
+                 bg-white p-8 transition
+                 hover:-translate-y-1
+                 hover:shadow-lg"
+        >
+          <span
+            class="text-sm font-bold text-emerald-700"
+          >
+            01
+          </span>
+
+          <h3
+            class="mt-16 text-3xl font-bold
+                   text-slate-900"
+          >
+            Penguins
+          </h3>
+
+          <p
+            class="mt-4 leading-7 text-slate-600"
+          >
+            Morphologie et caractéristiques des manchots.
+          </p>
+        </a>
+
+
+        <a
+          href="/cars"
+          class="rounded-3xl border border-slate-200
+                 bg-white p-8 transition
+                 hover:-translate-y-1
+                 hover:shadow-lg"
+        >
+          <span
+            class="text-sm font-bold text-emerald-700"
+          >
+            02
+          </span>
+
+          <h3
+            class="mt-16 text-3xl font-bold
+                   text-slate-900"
+          >
+            Cars
+          </h3>
+
+          <p
+            class="mt-4 leading-7 text-slate-600"
+          >
+            Consommation, puissance et poids des voitures.
+          </p>
+        </a>
+
 
         <a
           href="/pizza"
-          class="group flex min-h-105 flex-col justify-between
-                 rounded-3xl border border-slate-200 bg-white p-8
-                 transition duration-300
-                 hover:-translate-y-2 hover:bg-slate-900
-                 hover:text-white hover:shadow-xl"
+          class="rounded-3xl border border-slate-200
+                 bg-white p-8 transition
+                 hover:-translate-y-1
+                 hover:shadow-lg"
         >
-
-          <div class="flex items-center justify-between">
-
-            <span class="font-bold text-emerald-700">
-              03
-            </span>
-
-            <span
-              class="text-2xl transition group-hover:-translate-y-1
-                     group-hover:translate-x-1"
-              aria-hidden="true"
-            >
-              ↗
-            </span>
-
-          </div>
-
-          <div>
-
-            <h3 class="text-4xl font-bold tracking-tight">
-              Pizza
-            </h3>
-
-            <p
-              class="mt-5 leading-7 text-slate-600
-                     group-hover:text-slate-300"
-            >
-              Commandes, chiffre d'affaires, catégories
-              et habitudes de consommation.
-            </p>
-
-          </div>
-
           <span
-            class="text-sm text-slate-500 group-hover:text-slate-400"
+            class="text-sm font-bold text-emerald-700"
           >
-            3 visualisations
+            03
           </span>
 
+          <h3
+            class="mt-16 text-3xl font-bold
+                   text-slate-900"
+          >
+            Pizza
+          </h3>
+
+          <p
+            class="mt-4 leading-7 text-slate-600"
+          >
+            Commandes, revenus et habitudes de consommation.
+          </p>
         </a>
 
       </div>

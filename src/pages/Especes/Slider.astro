@@ -1,0 +1,324 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import GraphicSpecies from "../../components/GraphicSpecies.astro";
+---
+
+<Layout title="Slider des espèces — TP2 Observable Plot">
+
+  <main class="mx-auto max-w-7xl px-6 py-16 lg:px-10">
+
+    <a
+      href="/"
+      class="text-sm font-medium text-slate-500 transition
+             hover:text-emerald-700"
+    >
+      ← Retour à l'accueil
+    </a>
+
+
+    <!-- INTRODUCTION -->
+
+    <section class="py-20">
+
+      <p
+        class="mb-4 text-sm font-bold uppercase tracking-[0.2em]
+               text-emerald-700"
+      >
+        TP2 · Méthode 02
+      </p>
+
+      <h1
+        class="max-w-5xl text-6xl font-bold
+               leading-[0.95] tracking-tight
+               text-slate-900 md:text-8xl"
+      >
+        Trois graphiques,
+        <span class="block text-emerald-700">
+          une seule page.
+        </span>
+      </h1>
+
+      <p
+        class="mt-7 max-w-2xl text-lg leading-8
+               text-slate-600"
+      >
+        Les trois espèces sont regroupées dans un slider horizontal.
+        Les liens du menu utilisent des ancres pour atteindre chaque
+        graphique.
+      </p>
+
+    </section>
+
+
+    <!-- MENU ANCRES -->
+
+    <nav
+      class="sticky top-4 z-20 mb-10 flex w-fit
+             flex-wrap gap-2 rounded-full
+             border border-slate-200
+             bg-white/90 p-2 shadow-lg
+             backdrop-blur"
+      aria-label="Navigation dans le slider"
+    >
+
+      <a
+        href="#adelie"
+        class="menu-item active
+               rounded-full px-5 py-2.5
+               text-sm font-medium
+               text-slate-600 transition
+               hover:bg-slate-100
+               [&.active]:bg-emerald-700
+               [&.active]:text-white"
+      >
+        Adelie
+      </a>
+
+
+      <a
+        href="#gentoo"
+        class="menu-item
+               rounded-full px-5 py-2.5
+               text-sm font-medium
+               text-slate-600 transition
+               hover:bg-slate-100
+               [&.active]:bg-emerald-700
+               [&.active]:text-white"
+      >
+        Gentoo
+      </a>
+
+
+      <a
+        href="#chinstrap"
+        class="menu-item
+               rounded-full px-5 py-2.5
+               text-sm font-medium
+               text-slate-600 transition
+               hover:bg-slate-100
+               [&.active]:bg-emerald-700
+               [&.active]:text-white"
+      >
+        Chinstrap
+      </a>
+
+    </nav>
+
+
+    <!-- SLIDER -->
+
+    <div
+      class="slider flex w-full snap-x snap-mandatory
+             overflow-x-auto scroll-smooth
+             rounded-3xl"
+    >
+
+      <!-- ADELIE -->
+
+      <section
+        id="adelie"
+        class="item min-w-full snap-start
+               scroll-mt-32 px-1"
+        aria-labelledby="title-adelie"
+      >
+
+        <div class="mb-8">
+
+          <p
+            class="mb-3 text-sm font-bold uppercase
+                   tracking-[0.2em] text-emerald-700"
+          >
+            Espèce 01
+          </p>
+
+          <h2
+            id="title-adelie"
+            class="text-4xl font-bold tracking-tight
+                   text-slate-900 md:text-6xl"
+          >
+            Adelie
+          </h2>
+
+        </div>
+
+        <GraphicSpecies species="Adelie" />
+
+      </section>
+
+
+      <!-- GENTOO -->
+
+      <section
+        id="gentoo"
+        class="item min-w-full snap-start
+               scroll-mt-32 px-1"
+        aria-labelledby="title-gentoo"
+      >
+
+        <div class="mb-8">
+
+          <p
+            class="mb-3 text-sm font-bold uppercase
+                   tracking-[0.2em] text-emerald-700"
+          >
+            Espèce 02
+          </p>
+
+          <h2
+            id="title-gentoo"
+            class="text-4xl font-bold tracking-tight
+                   text-slate-900 md:text-6xl"
+          >
+            Gentoo
+          </h2>
+
+        </div>
+
+        <GraphicSpecies species="Gentoo" />
+
+      </section>
+
+
+      <!-- CHINSTRAP -->
+
+      <section
+        id="chinstrap"
+        class="item min-w-full snap-start
+               scroll-mt-32 px-1"
+        aria-labelledby="title-chinstrap"
+      >
+
+        <div class="mb-8">
+
+          <p
+            class="mb-3 text-sm font-bold uppercase
+                   tracking-[0.2em] text-emerald-700"
+          >
+            Espèce 03
+          </p>
+
+          <h2
+            id="title-chinstrap"
+            class="text-4xl font-bold tracking-tight
+                   text-slate-900 md:text-6xl"
+          >
+            Chinstrap
+          </h2>
+
+        </div>
+
+        <GraphicSpecies species="Chinstrap" />
+
+      </section>
+
+    </div>
+
+
+    <!-- PETITE INDICATION -->
+
+    <p
+      class="mt-5 text-center text-sm text-slate-500"
+    >
+      ← Faites défiler horizontalement pour comparer les espèces →
+    </p>
+
+
+    <div class="mt-16">
+
+      <a
+        href="/Especes/Adelie"
+        class="inline-flex rounded-full
+               bg-slate-900 px-6 py-3
+               font-medium text-white
+               transition hover:bg-emerald-700"
+      >
+        Voir la version avec plusieurs pages →
+      </a>
+
+    </div>
+
+  </main>
+
+
+  <script>
+
+    const initSpeciesObserver = () => {
+
+      const menuItems =
+        document.querySelectorAll(".menu-item");
+
+      const items =
+        document.querySelectorAll(".item");
+
+      const slider =
+        document.querySelector(".slider");
+
+
+      /*
+        Tests demandés dans le sujet
+      */
+
+      console.log(
+        "menuItems",
+        menuItems
+      );
+
+      console.log(
+        "items",
+        items
+      );
+
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+
+          entries.forEach((entry) => {
+
+            const id =
+              entry.target.getAttribute("id");
+
+            const menuItem =
+              document.querySelector(
+                `.menu-item[href="#${id}"]`
+              );
+
+
+            if (entry.isIntersecting) {
+
+              menuItems.forEach((item) => {
+                item.classList.remove("active");
+              });
+
+              menuItem?.classList.add("active");
+
+            }
+
+          });
+
+        },
+
+        {
+          root: slider,
+          threshold: 0.5
+        }
+
+      );
+
+
+      items.forEach((item) => {
+        observer.observe(item);
+      });
+
+    };
+
+
+    initSpeciesObserver();
+
+    document.addEventListener(
+      "astro:page-load",
+      initSpeciesObserver
+    );
+
+  </script>
+
+</Layout>

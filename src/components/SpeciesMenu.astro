@@ -1,0 +1,56 @@
+---
+interface Props {
+  current: "Adelie" | "Gentoo" | "Chinstrap";
+}
+
+const { current } = Astro.props as Props;
+
+const species = [
+  {
+    name: "Adelie",
+    href: "/Especes/Adelie"
+  },
+  {
+    name: "Gentoo",
+    href: "/Especes/Gentoo"
+  },
+  {
+    name: "Chinstrap",
+    href: "/Especes/Chinstrap"
+  }
+];
+---
+
+<nav
+  class="mt-8 flex flex-wrap items-center gap-3"
+  aria-label="Navigation entre les espèces"
+>
+  {
+    species.map((item) => (
+      <a
+        href={item.href}
+        aria-current={current === item.name ? "page" : undefined}
+        class:list={[
+          "rounded-full px-5 py-2.5 text-sm font-medium transition",
+          "focus-visible:outline focus-visible:outline-4",
+          "focus-visible:outline-offset-4 focus-visible:outline-emerald-600",
+
+          current === item.name
+            ? "bg-emerald-700 text-white"
+            : "bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-100"
+        ]}
+      >
+        {item.name}
+      </a>
+    ))
+  }
+
+  <a
+    href="/Especes/Slider"
+    class="ml-0 rounded-full bg-slate-900 px-5 py-2.5
+           text-sm font-medium text-white transition
+           hover:bg-emerald-700 md:ml-3"
+  >
+    Vue avec slider →
+  </a>
+</nav>

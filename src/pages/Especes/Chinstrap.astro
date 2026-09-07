@@ -4,7 +4,7 @@ import GraphicSpecies from "../../components/GraphicSpecies.astro";
 import SpeciesMenu from "../../components/SpeciesMenu.astro";
 ---
 
-<Layout title="Adelie — TP2 Observable Plot">
+<Layout title="Chinstrap — TP2 Observable Plot">
 
   <main class="mx-auto max-w-6xl px-6 py-16 lg:px-10">
 
@@ -17,7 +17,7 @@ import SpeciesMenu from "../../components/SpeciesMenu.astro";
     </a>
 
 
-    <SpeciesMenu current="Adelie" />
+    <SpeciesMenu current="Chinstrap" />
 
 
     <section class="py-20">
@@ -26,22 +26,22 @@ import SpeciesMenu from "../../components/SpeciesMenu.astro";
         class="mb-4 text-sm font-bold uppercase tracking-[0.2em]
                text-emerald-700"
       >
-        TP2 · Espèce 01
+        TP2 · Espèce 03
       </p>
 
       <h1
         class="text-6xl font-bold tracking-tight
                text-slate-900 md:text-8xl"
       >
-        Adelie
+        Chinstrap
       </h1>
 
       <p
         class="mt-6 max-w-2xl text-lg leading-8
                text-slate-600"
       >
-        Cette première méthode utilise une page Astro dédiée
-        à chaque espèce de manchot.
+        Cette page affiche uniquement les individus appartenant
+        à l'espèce Chinstrap.
       </p>
 
     </section>
@@ -49,7 +49,7 @@ import SpeciesMenu from "../../components/SpeciesMenu.astro";
 
     <section class="pb-20">
 
-      <GraphicSpecies species="Adelie" />
+      <GraphicSpecies species="Chinstrap" />
 
     </section>
 
